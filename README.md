@@ -104,8 +104,14 @@ Arquivos importantes:
   - V5__update_domain.sql — adiciona entidades como `produtos`, `servicos`, `saude`, `forum`, `prodi`, `galeria`, `roteiro`, `motivo`, `baixa`, `sintomas` (nota: `servicos` criou colunas camelCase citadas para grupos).
   - V6__categorias_veiculos.sql — cria `categoria` e `veiculo`, com FKs para `estabelecimento` e `categoria` e constraint de mínimo para `chassi`.
   - V7__licencias_mensagens_timelines_unidades_apreensoes.sql — cria `licencia`, `mensagem`, `timeline`, `unidademedida` (com UNIQUE em `sigla`) e `apreensao` com FKs e índices.
-  - V8__ajustes_nomes_colunas_servicos.sql — padroniza colunas de `servicos` renomeando `\"grupoAservicos\"..\"grupoEservicos\"` para `grupo_a`..`grupo_e`.
+  - V8__ajustes_nomes_colunas_servicos.sql — padroniza colunas de `servicos` renomeando `"grupoAservicos".."grupoEservicos"` para `grupo_a`..`grupo_e`.
   - V9__seed_usuario_permissao_tabela.sql — semeia dados para testes de autenticação/autorização (usuário admin `admin@local` com permissões completas em tabelas-chave).
+  - V10__reseed_admin_password.sql — garante senha BCrypt válida para `admin@local` e mantém usuário ativo; idempotente (atualiza/insere conforme necessário).
+  - V11__cupomauto_documentos_geraauto_resposta_embalagem_fiscaladm_geraprodi.sql — cria tabelas do legado: `cupomauto`, `documento`, `geraauto`, `resposta` (FK para `forum`), `embalagem`, `fiscaladm` (FK para `usuario`) e `geraprodi`, com sequências.
+  - V12__rename_columns_snake_case_legacy.sql — renomeia colunas criadas em V11 para snake_case, alinhando com a estratégia física do Hibernate.
+  - V13__administrativo_agrupamento_analiseprocesso_areainspecao_arquitetonico_licenciamento.sql — cria `administrativo`, `agrupamento`, `analiseprocesso`, `areainspecao`, `arquitetonicos` e `licenciamento` com FKs e índices necessários.
+  - V14__adjust_sequences_allocation_size.sql — ajusta `INCREMENT BY` das sequências para 50, alinhando ao `allocationSize` padrão do Hibernate.
+  - V15__create_missing_sequences_auto.sql — cria sequências esperadas pelo Hibernate para AUTO sem `@SequenceGenerator` (`analiseprocesso_seq`, `areainspecao_seq`).
 - Alinhamento de schema:
   - Hibernate valida no schema `app` via `spring.jpa.properties.hibernate.default_schema=${DB_SCHEMA:app}`.
   - Flyway migra no schema `app` via `spring.flyway.default-schema`/`schemas`.
@@ -234,7 +240,7 @@ A aplicação foi migrada de HTTP Basic para JWT, mantendo o domínio existente 
   - `UsuarioDetailsService` (`src/main/java/br/gov/mt/vigilancia/saude/security/UsuarioDetailsService.java`) busca por email com `left join fetch` de permissões/tabela.
 
 - Configuração de segurança (JWT)
-  - `SecurityConfig` (`src/main/main/java/br/gov/mt/vigilancia/saude/config/SecurityConfig.java`):
+  - `SecurityConfig` (`src/main/java/br/gov/mt/vigilancia/saude/config/SecurityConfig.java`):
     - Stateless (`SessionCreationPolicy.STATELESS`), CSRF desabilitado, CORS default.
     - Rotas públicas: `/`, `/health`, `/actuator/health`, `/actuator/info`, `POST /auth/login`.
     - Filtro: `JwtAuthenticationFilter` antes de `UsernamePasswordAuthenticationFilter`.
