@@ -174,6 +174,16 @@ Atualmente mapeados (podem evoluir):
 - `POST /geraprodis` — cria novo geraprodi
 - `PUT /geraprodis/{id}` — atualiza geraprodi existente
 - `DELETE /geraprodis/{id}` — deleta geraprodi
+- `GET /administrativos` — lista de administrativos
+- `GET /agrupamentos` — lista de agrupamentos
+- `GET /analiseprocessos` — lista de analises de processo
+- `GET /areainspecao` — lista de areas de inspecao
+- `GET /arquitetonicos` — lista de arquitetonicos
+- `GET /licenciamentos` — lista de licenciamentos
+- `GET /licenciamentos/{id}` — busca licenciamento por ID
+- `POST /licenciamentos` — cria novo licenciamento
+- `PUT /licenciamentos/{id}` — atualiza licenciamento existente
+- `DELETE /licenciamentos/{id}` — deleta licenciamento
 
 ## Build, testes e qualidade
 - Compilar e rodar testes:
@@ -203,7 +213,7 @@ PGADMIN_DEFAULT_EMAIL=admin@example.com
 PGADMIN_DEFAULT_PASSWORD=adminsecret
 
 # JWT (para desenvolvimento; em produção use segredos fortes)
-JWT_SECRET_BASE64=c3ByaW5nLWJvb3Qtc2VjcmV0LXNlZWQta2V5LXNob3VsZC1iZS1sb25nIQ==
+JWT_SECRET_BASE64=c3ByaW5nLWJvb3Qts-secrect-seed-key-should-be-long-enough-for-HS256
 JWT_ISSUER=vigilancia
 JWT_EXP_SECONDS=3600
 ```
@@ -235,7 +245,7 @@ A aplicação foi migrada de HTTP Basic para JWT, mantendo o domínio existente 
     ```yaml
     security:
       jwt:
-        secret: ${JWT_SECRET_BASE64:c3ByaW5nLWJvb3Qtc2VjcmV0LXNlZWQta2V5LXNob3VsZC1iZS1sb25nIQ==}
+        secret: ${JWT_SECRET_BASE64:c3ByaW5nLWJvb3Qtsecrect-seed-key-should-be-long-enough-for-HS256}
         issuer: ${JWT_ISSUER:vigilancia}
         expiration: ${JWT_EXP_SECONDS:3600}
     ```
