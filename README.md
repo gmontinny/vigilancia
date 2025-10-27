@@ -190,6 +190,21 @@ Atualmente mapeados (podem evoluir):
 - `POST /licenciamentos` — cria novo licenciamento
 - `PUT /licenciamentos/{id}` — atualiza licenciamento existente
 - `DELETE /licenciamentos/{id}` — deleta licenciamento
+- `GET /arquivodocumentos` — lista de arquivos de documento
+- `GET /arquivodocumentos/{id}` — busca arquivo de documento por ID
+- `POST /arquivodocumentos` — cria novo arquivo de documento
+- `PUT /arquivodocumentos/{id}` — atualiza arquivo de documento existente
+- `DELETE /arquivodocumentos/{id}` — deleta arquivo de documento
+- `GET /assuntosolicitacoes` — lista de assuntos de solicitação
+- `GET /assuntosolicitacoes/{id}` — busca assunto de solicitação por ID
+- `POST /assuntosolicitacoes` — cria novo assunto de solicitação
+- `PUT /assuntosolicitacoes/{id}` — atualiza assunto de solicitação existente
+- `DELETE /assuntosolicitacoes/{id}` — deleta assunto de solicitação
+- `GET /atividadefiscais` — lista de atividades fiscais
+- `GET /atividadefiscais/{id}` — busca atividade fiscal por ID
+- `POST /atividadefiscais` — cria nova atividade fiscal
+- `PUT /atividadefiscais/{id}` — atualiza atividade fiscal existente
+- `DELETE /atividadefiscais/{id}` — deleta atividade fiscal
 
 ## Build, testes e qualidade
 - Compilar e rodar testes:
@@ -219,7 +234,7 @@ PGADMIN_DEFAULT_EMAIL=admin@example.com
 PGADMIN_DEFAULT_PASSWORD=adminsecret
 
 # JWT (para desenvolvimento; em produção use segredos fortes)
-JWT_SECRET_BASE64=c3ByaW5nLWJvb3Qts-secrect-seed-key-should-be-long-enough-for-HS256
+JWT_SECRET_BASE64=c3ByaW5nLWJvb3Qtsecrect-seed-key-should-be-long-enough-for-HS256
 JWT_ISSUER=vigilancia
 JWT_EXP_SECONDS=3600
 ```
