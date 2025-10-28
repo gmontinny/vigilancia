@@ -205,6 +205,26 @@ Atualmente mapeados (podem evoluir):
 - `POST /atividadefiscais` — cria nova atividade fiscal
 - `PUT /atividadefiscais/{id}` — atualiza atividade fiscal existente
 - `DELETE /atividadefiscais/{id}` — deleta atividade fiscal
+- `GET /atividadevigilancias` — lista de atividades de vigilância
+- `GET /atividadevigilancias/{id}` — busca atividade de vigilância por ID
+- `POST /atividadevigilancias` — cria nova atividade de vigilância
+- `PUT /atividadevigilancias/{id}` — atualiza atividade de vigilância existente
+- `DELETE /atividadevigilancias/{id}` — deleta atividade de vigilância
+- `GET /autoinfracoes` — lista de autoinfrações
+- `GET /autoinfracoes/{id}` — busca autoinfração por ID
+- `POST /autoinfracoes` — cria nova autoinfração
+- `PUT /autoinfracoes/{id}` — atualiza autoinfração existente
+- `DELETE /autoinfracoes/{id}` — deleta autoinfração
+- `GET /tramitacoes` — lista de tramitações
+- `GET /tramitacoes/{id}` — busca tramitação por ID
+- `POST /tramitacoes` — cria nova tramitação
+- `PUT /tramitacoes/{id}` — atualiza tramitação existente
+- `DELETE /tramitacoes/{id}` — deleta tramitação
+- `GET /autonotificacoes` — lista de autonotificações
+- `GET /autonotificacoes/{id}` — busca autonotificação por ID
+- `POST /autonotificacoes` — cria nova autonotificação
+- `PUT /autonotificacoes/{id}` — atualiza autonotificação existente
+- `DELETE /autonotificacoes/{id}` — deleta autonotificação
 
 ## Build, testes e qualidade
 - Compilar e rodar testes:
