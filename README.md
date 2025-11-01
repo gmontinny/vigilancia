@@ -48,6 +48,8 @@ Crie um arquivo `.env` (não versionado idealmente) com o seguinte conteúdo (ex
 POSTGRES_USER=appuser
 POSTGRES_PASSWORD=appsecret
 POSTGRES_DB=vigilancia
+DB_SCHEMA=app
+SERVER_PORT=8081
 PGADMIN_DEFAULT_EMAIL=admin@example.com
 PGADMIN_DEFAULT_PASSWORD=adminsecret
 ```
@@ -118,11 +120,30 @@ Arquivos importantes:
   - V19__despachos_docnecessario_upload_documentoerrado.sql — cria tabelas de despachos e documentos.
   - V20__embalagem_empresainfracoes_entregador_exiberoteiro_farmaceutico_montarroteiro.sql — cria tabelas de embalagens e roteiros.
   - V21__fix_embalagem_sequence.sql — corrige sequência da tabela embalagem.
+- V22__geraatividade_geracategoriaservico_geracodigocertificacao_geradocumento_geragaleria.sql — cria as tabelas do legado para as entidades `Geraatividade`, `Geracategoriaservico`, `Geracodigocertificacao`, `Geradocumento` e `Geragaleria` com sequences (INCREMENT BY 50) e índices de `idusuario` onde aplicável.
 - Alinhamento de schema:
   - Hibernate valida no schema `app` via `spring.jpa.properties.hibernate.default_schema=${DB_SCHEMA:app}`.
   - Flyway migra no schema `app` via `spring.flyway.default-schema`/`schemas`.
   - Opcional: acrescente `?currentSchema=app` na URL JDBC para ambientes que não respeitam o `search_path`.
 - Para criar uma nova versão, adicione um arquivo `V{N}__sua_descricao.sql` seguindo a sequência numérica e rode a aplicação.
+
+#### Notas sobre a V22
+- Arquivo: `src/main/resources/db/migration/V22__geraatividade_geracategoriaservico_geracodigocertificacao_geradocumento_geragaleria.sql`
+- Padrões:
+  - Schema: `app` (alinhado ao `application.yml`).
+  - Sequences com `INCREMENT BY 50` para cada tabela.
+  - Tabelas com PK usando `DEFAULT nextval('schema.sequence')`.
+  - Índices para colunas `idusuario` onde aplicável.
+  - Bloco `DO $$` para ajustar (`setval`) as sequences de acordo com dados existentes (idempotente).
+- Tabelas criadas: `geraatividade`, `geracategoriaservico`, `geracodigocertificacao`, `geradocumento`, `geragaleria`.
+- Observação: Não foram incluídas FKs, pois as entidades do legado não declaram relações explícitas. Poderá ser evoluído no futuro.
+
+#### Como aplicar a V22
+- Ao iniciar a aplicação com banco configurado, a Flyway aplicará automaticamente.
+- Alternativas:
+  - Via Gradle: `./gradlew flywayMigrate`
+  - Subindo via Docker Compose e rodando a aplicação: `docker compose up -d` (db) e depois `./gradlew bootRun` (app)
+- Requisitos: variáveis `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` e opcionalmente `DB_SCHEMA` (padrão `app`).
 
 ## Execução de migrações com Gradle (Flyway plugin)
 O plugin Flyway está configurado no `build.gradle` com as dependências PostgreSQL no buildscript.
