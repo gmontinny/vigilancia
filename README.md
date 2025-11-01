@@ -101,22 +101,60 @@ Arquivos importantes:
   - V2__domain_schema.sql — base do domínio: `conselho`, `responsavel_tecnico`, `usuario`, `estabelecimento`, `processo` + FKs e índices.
   - V3__grupo_subgrupo.sql — tabelas `grupo` e `subgrupo` com validações básicas.
   - V4__domain_full.sql — amplia o domínio (ex.: `acao`, `endereco`, `tipoempresa`, `ordemservico`, `reclamacao`, `bpa`, `tabela`, `fiscal`, etc.).
-  - V5__update_domain.sql — adiciona entidades como `produtos`, `servicos`, `saude`, `forum`, `prodi`, `galeria`, `roteiro`, `motivo`, `baixa`, `sintomas` (nota: `servicos` criou colunas camelCase citadas para grupos).
-  - V6__categorias_veiculos.sql — cria `categoria` e `veiculo`, com FKs para `estabelecimento` e `categoria` e constraint de mínimo para `chassi`.
-  - V7__licencias_mensagens_timelines_unidades_apreensoes.sql — cria `licencia`, `mensagem`, `timeline`, `unidademedida` (com UNIQUE em `sigla`) e `apreensao` com FKs e índices.
-  - V8__ajustes_nomes_colunas_servicos.sql — padroniza colunas de `servicos` renomeando `"grupoAservicos".."grupoEservicos"` para `grupo_a`..`grupo_e`.
-  - V9__seed_usuario_permissao_tabela.sql — semeia dados para testes de autenticação/autorização (usuário admin `admin@local` com permissões completas em tabelas-chave).
-  - V10__reseed_admin_password.sql — garante senha BCrypt válida para `admin@local` e mantém usuário ativo; idempotente (atualiza/insere conforme necessário).
-  - V11__cupomauto_documentos_geraauto_resposta_embalagem_fiscaladm_geraprodi.sql — cria tabelas do legado: `cupomauto`, `documento`, `geraauto`, `resposta` (FK para `forum`), `embalagem`, `fiscaladm` (FK para `usuario`) e `geraprodi`, com sequências.
-  - V12__rename_columns_snake_case_legacy.sql — renomeia colunas criadas em V11 para snake_case, alinhando com a estratégia física do Hibernate.
-  - V13__administrativo_agrupamento_analiseprocesso_areainspecao_arquitetonico_licenciamento.sql — cria `administrativo`, `agrupamento`, `analiseprocesso`, `areainspecao`, `arquitetonicos` e `licenciamento` com FKs e índices necessários.
-  - V14__adjust_sequences_allocation_size.sql — ajusta `INCREMENT BY` das sequências para 50, alinhando ao `allocationSize` padrão do Hibernate.
-  - V15__create_missing_sequences_auto.sql — cria sequências esperadas pelo Hibernate para AUTO sem `@SequenceGenerator` (`analiseprocesso_seq`, `areainspecao_seq`).
+  - V5__update_domain.sql — adiciona entidades como `produtos`, `servicos`, `saude`, `forum`, `prodi`, `galeria`, `roteiro`, `motivo`, `baixa`, `sintomas`.
+  - V6__categorias_veiculos.sql — cria `categoria` e `veiculo`, com FKs para `estabelecimento` e `categoria`.
+  - V7__licencias_mensagens_timelines_unidades_apreensoes.sql — cria `licencia`, `mensagem`, `timeline`, `unidademedida` e `apreensao` com FKs e índices.
+  - V8__ajustes_nomes_colunas_servicos.sql — padroniza colunas de `servicos` para snake_case.
+  - V9__seed_usuario_permissao_tabela.sql — semeia dados para testes de autenticação/autorização (usuário admin `admin@local`).
+  - V10__reseed_admin_password.sql — garante senha BCrypt válida para `admin@local`.
+  - V11__cupomauto_documentos_geraauto_resposta_embalagem_fiscaladm_geraprodi.sql — cria tabelas do legado com sequências.
+  - V12__rename_columns_snake_case_legacy.sql — renomeia colunas para snake_case, alinhando com Hibernate.
+  - V13__administrativo_agrupamento_analiseprocesso_areainspecao_arquitetonico_licenciamento.sql — cria tabelas administrativas com FKs e índices.
+  - V14__adjust_sequences_allocation_size.sql — ajusta `INCREMENT BY` das sequências para 50.
+  - V15__create_missing_sequences_auto.sql — cria sequências esperadas pelo Hibernate.
+  - V16__arquivodocumento_assuntosolicitacao_atividadefiscal_atividades_atividadevigilancia.sql — cria tabelas de documentos e atividades.
+  - V17__autoinfracao_tramitacao_autonotificacao_balancomedicamento_bloqueioitenssolicitacao_itenssolicitacao_solicitacao_tipoinspecao_carteirinha.sql — cria tabelas de infrações, tramitações e solicitações.
+  - V18__categoriaanalise_categoriaproduto_categoriaroteiro_categoriaservico_despachocontrarazao_itensroteiro_servicosaude_legislacao.sql — cria tabelas de categorias e serviços de saúde.
+  - V19__despachos_docnecessario_upload_documentoerrado.sql — cria tabelas de despachos e documentos.
+  - V20__embalagem_empresainfracoes_entregador_exiberoteiro_farmaceutico_montarroteiro.sql — cria tabelas de embalagens e roteiros.
+  - V21__fix_embalagem_sequence.sql — corrige sequência da tabela embalagem.
 - Alinhamento de schema:
   - Hibernate valida no schema `app` via `spring.jpa.properties.hibernate.default_schema=${DB_SCHEMA:app}`.
   - Flyway migra no schema `app` via `spring.flyway.default-schema`/`schemas`.
   - Opcional: acrescente `?currentSchema=app` na URL JDBC para ambientes que não respeitam o `search_path`.
 - Para criar uma nova versão, adicione um arquivo `V{N}__sua_descricao.sql` seguindo a sequência numérica e rode a aplicação.
+
+## Execução de migrações com Gradle (Flyway plugin)
+O plugin Flyway está configurado no `build.gradle` com as dependências PostgreSQL no buildscript.
+
+### Configuração atual
+- Plugin: `org.flywaydb.flyway` 10.20.0
+- Dependências no buildscript: `postgresql:42.7.4` e `flyway-database-postgresql:10.20.0`
+- Schema padrão: `app`
+- Credenciais padrão: `appuser/appsecret` (conforme `.env`)
+
+### Comandos úteis
+- Ver informações das migrações:
+```bash
+./gradlew flywayInfo
+```
+- Executar migrações:
+```bash
+./gradlew flywayMigrate
+```
+- Usar credenciais diferentes:
+```bash
+./gradlew flywayInfo -Pflyway.user=seuusuario -Pflyway.password=suasenha
+```
+- Limpar schema (cuidado):
+```bash
+./gradlew flywayClean
+```
+
+### Troubleshooting
+- Certifique-se de que o Docker Compose está rodando: `docker compose up -d`
+- Verifique se o banco existe e as credenciais estão corretas
+- Para debug: `./gradlew flywayInfo --info --stacktrace`
 
 ## Endpoints disponíveis
 Atualmente mapeados (podem evoluir):
@@ -361,4 +399,4 @@ A aplicação foi migrada de HTTP Basic para JWT, mantendo o domínio existente 
 
 ---
 
-Mantido por: Equipe de Vigilância Sanitária. Atualizado em 2025-10-26.
+Mantido por: Equipe de Vigilância Sanitária. Atualizado em 2025-11-01.
