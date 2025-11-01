@@ -17,11 +17,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "roteiro")
+@Table(name = "roteiro", schema = "app")
 public class Roteiro {
 
     @Id
-    @SequenceGenerator(name = "roteiro_idroteiro_seq", sequenceName = "roteiro_idroteiro_seq", allocationSize = 1)
+    @SequenceGenerator(name = "roteiro_idroteiro_seq", sequenceName = "app.roteiro_idroteiro_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "roteiro_idroteiro_seq")
     private Integer id;
 

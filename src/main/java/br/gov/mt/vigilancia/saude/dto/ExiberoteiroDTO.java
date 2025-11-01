@@ -9,9 +9,10 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmbalagemDTO implements Serializable {
+public class ExiberoteiroDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Integer idembalagem;
-    private String descricaoembalagem;
+    private Integer idexiberoteiro;
+    private Integer idmontarroteiro;
+    private String numprocesso;
 }

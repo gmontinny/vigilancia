@@ -16,8 +16,8 @@ public class EmbalagemController {
     private EmbalagemService embalagemService;
 
     @GetMapping
-    public List<EmbalagemDTO> getAllEmbalagens() {
-        return embalagemService.findAll();
+    public ResponseEntity<List<EmbalagemDTO>> getAllEmbalagens() {
+        return ResponseEntity.ok(embalagemService.findAll());
     }
 
     @GetMapping("/{id}")
@@ -28,15 +28,15 @@ public class EmbalagemController {
     }
 
     @PostMapping
-    public EmbalagemDTO createEmbalagem(@RequestBody EmbalagemDTO embalagemDTO) {
-        return embalagemService.save(embalagemDTO);
+    public ResponseEntity<EmbalagemDTO> createEmbalagem(@RequestBody EmbalagemDTO embalagemDTO) {
+        return ResponseEntity.ok(embalagemService.save(embalagemDTO));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<EmbalagemDTO> updateEmbalagem(@PathVariable Integer id, @RequestBody EmbalagemDTO embalagemDTO) {
         return embalagemService.findById(id)
-                .map(existingEmbalagem -> {
-                    embalagemDTO.setIdEmbalagem(id);
+                .map(existingEmbalagemDTO -> {
+                    embalagemDTO.setIdembalagem(id);
                     return ResponseEntity.ok(embalagemService.save(embalagemDTO));
                 })
                 .orElse(ResponseEntity.notFound().build());
@@ -44,10 +44,7 @@ public class EmbalagemController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEmbalagem(@PathVariable Integer id) {
-        if (embalagemService.findById(id).isPresent()) {
-            embalagemService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        embalagemService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,7 +1,15 @@
+buildscript {
+    dependencies {
+        classpath 'org.postgresql:postgresql:42.7.4'
+        classpath 'org.flywaydb:flyway-database-postgresql:10.20.0'
+    }
+}
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.7'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.flywaydb.flyway' version '10.20.0'
 }
 
 group = 'br.gov.mt.vigilancia'
@@ -42,7 +50,10 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
+    // Application runtime JDBC driver
     runtimeOnly 'org.postgresql:postgresql'
+    
+
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -60,4 +71,13 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+
+flyway {
+    url = 'jdbc:postgresql://localhost:5432/vigilancia'
+    user = 'gmontinny'
+    password = 'Gmontinny2025'
+    schemas = ['app']
+    locations = ['filesystem:src/main/resources/db/migration']
 }
