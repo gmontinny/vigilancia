@@ -9,9 +9,12 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProdutoCategoriaDTO implements Serializable {
+public class ItensembalagemDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Integer idprodutocategoria;
-    private String nomeprodutocategoria;
+    private Integer iditensembalagem;
+    private Integer idembalagem;
+    private Long idestabelecimento;
+    private Integer numeroprodi;
+    private Integer numeroitensprodi;
 }

@@ -193,7 +193,11 @@ Atualmente mapeados (podem evoluir):
 - `GET /acoes` — lista ações
 - `GET /ordens-servico` — lista ordens de serviço
 - `GET /reclamacoes` — lista reclamações
-- `GET /produtos-categoria` — lista categorias de produto
+- `GET /produtocategorias` — lista categorias de produto
+- `GET /produtocategorias/{id}` — busca categoria por ID
+- `POST /produtocategorias` — cria categoria
+- `PUT /produtocategorias/{id}` — atualiza categoria
+- `DELETE /produtocategorias/{id}` — exclui categoria
 - `GET /fiscais` — lista fiscais
 - `GET /tabelas` — lista tabelas
 - `GET /permissoes` — lista permissões
@@ -421,3 +425,53 @@ A aplicação foi migrada de HTTP Basic para JWT, mantendo o domínio existente 
 ---
 
 Mantido por: Equipe de Vigilância Sanitária. Atualizado em 2025-11-01.
+
+
+---
+
+## Atualizações recentes (2025-11-08)
+
+Este projeto recebeu ajustes para estabilizar o build, alinhar mapeamentos JPA e concluir migrações de banco de dados.
+
+### Migrações Flyway
+- V25__itens_termocolheita_produtocategoria.sql
+  - Cria as tabelas: `produtocategoria`, `termocolheita`, `itensembalagem`, `itenscolheita`, `itensdocumento`, `itensexiberoteiro`, `itensgaleria` no schema `app`.
+  - Sequences com `INCREMENT BY 50` e `setval` idempotente.
+  - FK `termocolheita.idprodutocategoria` → `REFERENCES app.produtocategoria` (sem fixar o nome da coluna da PK) para compatibilidade com esquemas legados.
+- V26__add_nomeprodutocategoria.sql
+  - Adiciona a coluna `nomeprodutocategoria` (nullable) em `app.produtocategoria` caso não exista e tenta preencher a partir de colunas legadas (`nome`, `descricao`, `categoria`).
+- V27__ajusta_incremento_seq_produtocategoria.sql
+  - Ajusta a sequência `app.produtocategoria_idprodutocategoria_seq` para `INCREMENT BY 50`, alinhando ao `allocationSize` do JPA.
+
+### Ajustes de entidades (JPA)
+- ProdutoCategoria
+  - `@Table(name = "produtocategoria", schema = "app")`.
+  - Campo Java `idprodutocategoria` mapeado para a coluna física `id` com `@Column(name = "id")`.
+  - `@SequenceGenerator(sequenceName = "app.produtocategoria_idprodutocategoria_seq", allocationSize = 50)`.
+  - Relação com `Reclamacao`: `@OneToMany(mappedBy = "produtoCategoria")` (corrigido).
+- Termocolheita, Itenscolheita, Itensdocumento, Itensembalagem, Itensexiberoteiro, Itensgaleria
+  - `@Table(schema = "app")` definido para evitar divergências de snake_case do Hibernate com a DDL do Flyway.
+
+### Ajustes nos mappers (MapStruct)
+- ReclamacaoMapper: `produtoCategoria.idprodutocategoria` ↔ `idProdutoCategoria` (DTO).
+- TermocolheitaMapper: `produtocategoria.idprodutocategoria` e `motivo.id` mapeados corretamente.
+- ProdutoCategoriaMapper: `@Mapping(target = "reclamacaos", ignore = true)` ao criar entidade.
+- ItensembalagemMapper: mapeamentos aninhados corrigidos (`estabelecimento.id`).
+
+### Endpoints afetados
+- `ProdutoCategoriaController`
+  - `GET /produtocategorias`
+  - `GET /produtocategorias/{id}`
+  - `POST /produtocategorias`
+  - `PUT /produtocategorias/{id}`
+  - `DELETE /produtocategorias/{id}`
+
+### Como validar
+1) Rodar migrações: `./gradlew flywayMigrate`
+2) Rodar testes: `./gradlew test` ou subir a aplicação (`bootRun`).
+3) Verificar:
+   - Colunas `id` e `nomeprodutocategoria` em `app.produtocategoria` presentes.
+   - Sequência `app.produtocategoria_idprodutocategoria_seq` com `INCREMENT BY 50`.
+   - Relacionamento `ProdutoCategoria` ↔ `Reclamacao` válido (`mappedBy = produtoCategoria`).
+
+Para um resumo focado somente nas mudanças desta data, veja também `README_UPDATE_2025-11-08.md` na raiz do projeto.

@@ -3,6 +3,7 @@ package br.gov.mt.vigilancia.saude.mapper;
 import br.gov.mt.vigilancia.saude.domain.ProdutoCategoria;
 import br.gov.mt.vigilancia.saude.dto.ProdutoCategoriaDTO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
@@ -10,7 +11,8 @@ public interface ProdutoCategoriaMapper {
 
     ProdutoCategoriaMapper INSTANCE = Mappers.getMapper(ProdutoCategoriaMapper.class);
 
-    ProdutoCategoriaDTO toDto(ProdutoCategoria produtoCategoria);
+    ProdutoCategoriaDTO toDTO(ProdutoCategoria produtocategoria);
 
-    ProdutoCategoria toEntity(ProdutoCategoriaDTO produtoCategoriaDTO);
+    @Mapping(target = "reclamacaos", ignore = true)
+    ProdutoCategoria toEntity(ProdutoCategoriaDTO produtocategoriaDTO);
 }

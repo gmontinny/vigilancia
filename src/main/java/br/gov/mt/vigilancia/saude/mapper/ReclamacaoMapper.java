@@ -12,10 +12,10 @@ public interface ReclamacaoMapper {
     ReclamacaoMapper INSTANCE = Mappers.getMapper(ReclamacaoMapper.class);
 
     @Mapping(source = "ordemServico.id", target = "idOrdemServico")
-    @Mapping(source = "produtoCategoria.id", target = "idProdutoCategoria")
+    @Mapping(source = "produtoCategoria.idprodutocategoria", target = "idProdutoCategoria")
     ReclamacaoDTO toDto(Reclamacao reclamacao);
 
     @Mapping(target = "ordemServico", ignore = true)
-    @Mapping(target = "produtoCategoria", ignore = true)
+    @Mapping(source = "idProdutoCategoria", target = "produtoCategoria.idprodutocategoria")
     Reclamacao toEntity(ReclamacaoDTO reclamacaoDTO);
 }
