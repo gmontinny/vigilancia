@@ -52,7 +52,7 @@ public class Autoinfracao implements Serializable {
 	
 	private String tipoinfracao;
 	
-	//bi-directional many-to-one association to Ordemservico
+	//bi-directional many-to-one association to OrdemServico
 	@ManyToOne
 	@JoinColumn(name="idtramitacao")
 	private Tramitacao tramitacao;

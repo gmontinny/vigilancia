@@ -1,67 +1,107 @@
 package br.gov.mt.vigilancia.saude.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
+import java.io.Serializable;
+import java.sql.Time;
+import jakarta.persistence.*;
+import java.util.Date;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 
+/**
+ * The persistent class for the ordemservico database table.
+ * 
+ */
+@Entity
+@Table(name = "ordemservico", schema = "app")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "ordemservico")
-public class OrdemServico {
+@NamedQuery(name="Ordemservico.findAll", query="SELECT o FROM OrdemServico o WHERE o.situacaoordemservico NOT IN (0,-1,2,3,6) ORDER BY o.dataordemservico")
+public class OrdemServico implements Serializable {
+	private static final long serialVersionUID = 1L;
 
-    @Id
-    @SequenceGenerator(name = "ordemservico_idordemservico_seq", sequenceName = "ordemservico_idordemservico_seq", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ordemservico_idordemservico_seq")
-    private Integer id;
+	@Id
+	@SequenceGenerator(name="ordemservico_idordemservico", sequenceName = "app.ordemservico_idordemservico_seq", allocationSize = 1)
+	@GeneratedValue(strategy=GenerationType.AUTO,generator="ordemservico_idordemservico")
+	@Column(name = "id")
+	private Integer idordemservico;
 
-    private LocalDate dataFinal;
+	@Temporal(TemporalType.DATE)
+	@Column(name = "data_final")
+	private Date datafinal;
 
-    private LocalDate dataInicial;
+	@Temporal(TemporalType.DATE)
+	@Column(name = "data_inicial")
+	private Date datainicial;
 
-    private LocalDate dataOrdemServico;
+	@Temporal(TemporalType.DATE)
+	@Column(name = "data_ordem_servico")
+	private Date dataordemservico;
+	
+	@Temporal(TemporalType.DATE)
+	@Column(name = "data_conclusao")
+	private Date dataconclusao;
+	
+	@Column(name = "usuario_conclusao")
+	private String usuarioconclusao;
 
-    private LocalDate dataConclusao;
+	@Column(name = "situacao")
+	private Integer situacaoordemservico;
+	
+	@Column(name = "texto_conclusao", length = 1024)
+	private String textoconclusao;
 
-    private String usuarioConclusao;
+	@Column(name = "texto_problema", length = 1024)
+	private String textoproblema;
+	
+	@Column(name = "prioridade")
+	private Integer prioridadeordemservico;
+	
+	@Column(name = "tls")
+	private Integer tlsordemservico;
+	
+	@Column(name = "tipo")
+	private Integer tipoordemservico;
+	
+	@Column(name = "hora_ordem_servico")
+	private Time horaordemservico;
+	
+	@Column(name = "tipo_documento")
+	private String tipodocumento;
+	
+	@Column(name = "descricao_documento")
+	private String descricaodocumento;
 
-    private Integer situacao;
+	//bi-directional many-to-one association to Acao
+	@ManyToOne
+	@JoinColumn(name="idacao")
+	private Acao acao;
 
-    private String textoConclusao;
 
-    private String textoProblema;
+	//bi-directional many-to-one association to Processo
+	@ManyToOne
+	@JoinColumn(name="numprocesso")
+	private Processo processo;
 
-    private Integer prioridade;
+	//bi-directional many-to-one association to Reclamacao
+	@OneToMany(mappedBy="ordemServico")
+	private List<Reclamacao> reclamacaos;
 
-    private Integer tls;
+	public Reclamacao addReclamacao(Reclamacao reclamacao) {
+		this.reclamacaos.add(reclamacao);
+		reclamacao.setOrdemServico(this);
+		return reclamacao;
+	}
 
-    private Integer tipo;
-
-    private LocalTime horaOrdemServico;
-
-    private String tipoDocumento;
-
-    private String descricaoDocumento;
-
-    @ManyToOne
-    @JoinColumn(name = "idacao")
-    private Acao acao;
-
-    @ManyToOne
-    @JoinColumn(name = "numprocesso")
-    private Processo processo;
+	public Reclamacao removeReclamacao(Reclamacao reclamacao) {
+		this.reclamacaos.remove(reclamacao);
+		reclamacao.setOrdemServico(null);
+		return reclamacao;
+	}
+	
 }

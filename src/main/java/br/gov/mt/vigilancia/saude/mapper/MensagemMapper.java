@@ -11,7 +11,7 @@ public interface MensagemMapper {
 
     MensagemMapper INSTANCE = Mappers.getMapper(MensagemMapper.class);
 
-    @Mapping(source = "ordemServico.id", target = "idOrdemServico")
+    @Mapping(source = "ordemServico.idordemservico", target = "idOrdemServico")
     MensagemDTO toDto(Mensagem mensagem);
 
     @Mapping(target = "ordemServico", ignore = true)

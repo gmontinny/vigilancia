@@ -11,7 +11,7 @@ public interface ForumMapper {
 
     ForumMapper INSTANCE = Mappers.getMapper(ForumMapper.class);
 
-    @Mapping(source = "ordemServico.id", target = "idOrdemServico")
+    @Mapping(source = "ordemServico.idordemservico", target = "idOrdemServico")
     @Mapping(source = "usuario.id", target = "idUsuario")
     ForumDTO toDto(Forum forum);
 

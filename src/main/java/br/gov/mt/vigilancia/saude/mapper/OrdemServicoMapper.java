@@ -6,16 +6,18 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "spring", uses = {AcaoMapper.class, ProcessoMapper.class})
+@Mapper(componentModel = "spring", uses = {ReclamacaoMapper.class})
 public interface OrdemServicoMapper {
 
     OrdemServicoMapper INSTANCE = Mappers.getMapper(OrdemServicoMapper.class);
 
-    @Mapping(source = "acao.id", target = "idAcao")
-    @Mapping(source = "processo.numeroProcesso", target = "numeroProcesso")
-    OrdemServicoDTO toDto(OrdemServico ordemServico);
+    @Mapping(source = "acao.id", target = "idacao")
+    @Mapping(source = "processo.numeroProcesso", target = "numprocesso")
+    @Mapping(target = "reclamacaos", source = "reclamacaos")
+    OrdemServicoDTO toDTO(OrdemServico ordemservico);
 
-    @Mapping(target = "acao", ignore = true)
-    @Mapping(target = "processo", ignore = true)
-    OrdemServico toEntity(OrdemServicoDTO ordemServicoDTO);
+    @Mapping(source = "idacao", target = "acao.id")
+    @Mapping(source = "numprocesso", target = "processo.numeroProcesso")
+    @Mapping(target = "reclamacaos", source = "reclamacaos")
+    OrdemServico toEntity(OrdemServicoDTO ordemservicoDTO);
 }

@@ -1,29 +1,40 @@
 package br.gov.mt.vigilancia.saude.dto;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.io.Serializable;
+import java.sql.Time;
+import java.util.Date;
+import java.util.List;
 
 @Data
-@Builder
-public class OrdemServicoDTO {
-    private Integer id;
-    private LocalDate dataFinal;
-    private LocalDate dataInicial;
-    private LocalDate dataOrdemServico;
-    private LocalDate dataConclusao;
-    private String usuarioConclusao;
-    private Integer situacao;
-    private String textoConclusao;
-    private String textoProblema;
-    private Integer prioridade;
-    private Integer tls;
-    private Integer tipo;
-    private LocalTime horaOrdemServico;
-    private String tipoDocumento;
-    private String descricaoDocumento;
-    private Integer idAcao;
-    private String numeroProcesso;
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrdemServicoDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private Integer idordemservico;
+    private Date datafinal;
+    private Date datainicial;
+    private Date dataordemservico;
+    private Date dataconclusao;
+    private String usuarioconclusao;
+    private Integer situacaoordemservico;
+    private String textoconclusao;
+    private String textoproblema;
+    private Integer prioridadeordemservico;
+    private Integer tlsordemservico;
+    private Integer tipoordemservico;
+    private Time horaordemservico;
+    private String tipodocumento;
+    private String descricaodocumento;
+    private Integer idacao;
+    private String numprocesso;
+    private List<ReclamacaoDTO> reclamacaos;
+
+    public void setIdordemservico(Integer id) {
+        this.idordemservico = id;
+    }
 }

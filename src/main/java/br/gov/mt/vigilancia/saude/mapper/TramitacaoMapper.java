@@ -11,11 +11,11 @@ public interface TramitacaoMapper {
 
     TramitacaoMapper INSTANCE = Mappers.getMapper(TramitacaoMapper.class);
 
-    @Mapping(source = "ordemservico.id", target = "idordemservico")
+    @Mapping(source = "ordemservico.idordemservico", target = "idordemservico")
     @Mapping(source = "tipoinspecao.idtipoinspecao", target = "idtipoinspecao")
     TramitacaoDTO toDTO(Tramitacao tramitacao);
 
-    @Mapping(source = "idordemservico", target = "ordemservico.id")
+    @Mapping(source = "idordemservico", target = "ordemservico.idordemservico")
     @Mapping(source = "idtipoinspecao", target = "tipoinspecao.idtipoinspecao")
     Tramitacao toEntity(TramitacaoDTO tramitacaoDTO);
 }

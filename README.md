@@ -475,3 +475,54 @@ Este projeto recebeu ajustes para estabilizar o build, alinhar mapeamentos JPA e
    - Relacionamento `ProdutoCategoria` ↔ `Reclamacao` válido (`mappedBy = produtoCategoria`).
 
 Para um resumo focado somente nas mudanças desta data, veja também `README_UPDATE_2025-11-08.md` na raiz do projeto.
+
+
+
+## Princípio preferencial: mapear entidades para o banco existente (sem renomear via migração)
+
+Contexto: Em ambientes com base de dados legada, os nomes reais das tabelas/colunas normalmente seguem snake_case e podem divergir dos nomes em Java (CamelCase). Para evitar retrabalho, instabilidade e migrações desnecessárias, este projeto adota o seguinte princípio operacional:
+
+- Priorize o mapeamento via anotações JPA/Hibernate nas entidades para alinhar com a estrutura já existente no banco.
+- Evite criar migrações apenas para renomear colunas/tabelas quando o objetivo é somente compatibilizar nomes entre código e banco.
+- Use migrações (Flyway) apenas quando houver necessidade real de mudança estrutural (criar tabela nova, adicionar coluna nova requerida pela regra de negócio, índices, FKs que não existem, etc.).
+
+### Como aplicar na prática
+
+1) Tabela existente com nomes diferentes do código:
+- Use `@Table(schema = "app", name = "tabela_existente")` na entidade.
+- Para cada campo, use `@Column(name = "nome_real_no_banco")` com `length`, `nullable` e `columnDefinition` quando necessário.
+- Para relacionamentos, use `@JoinColumn(name = "fk_no_banco")` e qualifique `schema` na entidade de destino quando aplicável.
+
+2) Sequence e geração de ID:
+- Aponte o gerador para a sequence real: `@SequenceGenerator(sequenceName = "app.minha_sequence", allocationSize = 1)`.
+- Ajuste `allocationSize` para refletir o incremento real da sequence no banco (em legados costuma ser 1). Só use 50 se a sequence também estiver com incremento 50.
+
+3) Validação de schema do Hibernate:
+- Se estiver habilitada, a aplicação só deve falhar por ausência de estrutura essencial (tabela/coluna inexistente), não por diferenças de nomenclatura. O mapeamento via `@Column/@JoinColumn` resolve a nomenclatura.
+
+4) Quando criar migração (Flyway):
+- Casos válidos: criação de novas tabelas/colunas requeridas pelas regras de negócio, novos índices, novas FKs que não existem no legado.
+- Casos a evitar: renomear coluna/tabela apenas para "combinar" com o Java.
+
+5) Exemplo real no projeto — OrdemServico
+- Tabela existente: `app.ordemservico` com colunas como `data_conclusao`, `data_ordem_servico`, `usuario_conclusao`, etc.
+- Entidade `OrdemServico` mapeada com:
+  - `@Table(name = "ordemservico", schema = "app")`
+  - `@Column(name = "data_conclusao")` para o campo Java `dataconclusao`
+  - `@Column(name = "data_ordem_servico")` para `dataordemservico`
+  - `@JoinColumn(name = "idacao")` e `@JoinColumn(name = "numprocesso")`
+  - Sequence: `@SequenceGenerator(sequenceName = "app.ordemservico_idordemservico_seq", allocationSize = 1)`
+
+6) Checklist rápido ao encontrar erro de validação do Hibernate (missing table/column):
+- A tabela existe? Se sim, adicione/ajuste `@Table(schema, name)`.
+- A coluna existe com outro nome (snake_case)? Adicione `@Column(name = ...)`.
+- A FK existe com outro nome? Ajuste `@JoinColumn(name = ...)`.
+- A sequence tem incremento diferente? Ajuste `allocationSize` para o valor real.
+- Só crie migração se a estrutura realmente não existir e precisar ser criada.
+
+7) Convenções para novos mapeamentos
+- Prefira campos `String` com `@Column(length = X)` quando precisar validar tamanho em nível de schema.
+- Em `LocalDate/Date/LocalDateTime/Time`, explicite `@Temporal` quando utilizando `java.util.Date`.
+- MapStruct: aponte para os nomes efetivos das propriedades nas entidades (não confundir com nomes de coluna no banco).
+
+Com esse fluxo, evitamos scripts desnecessários, aceleramos a entrega e mantemos compatibilidade com o banco legado sem "bagunçar" o schema.
