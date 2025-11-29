@@ -5,6 +5,14 @@ import br.gov.mt.vigilancia.saude.security.JwtTokenService;
 import br.gov.mt.vigilancia.saude.security.UsuarioDetailsService;
 import br.gov.mt.vigilancia.saude.dto.AuthResponse;
 import br.gov.mt.vigilancia.saude.dto.LoginRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,8 +34,13 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Controller responsável pela autenticação e autorização de usuários.
+ * Implementa autenticação JWT com endpoints para login, refresh de token e consulta de usuário autenticado.
+ */
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Autenticação", description = "Endpoints para autenticação e gerenciamento de tokens JWT")
 public class AuthController {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuthController.class);
@@ -47,7 +60,31 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Autentica um usuário e retorna um token JWT.
+     * 
+     * @param request Dados de login (email e senha)
+     * @return Token JWT e informações do usuário autenticado
+     */
     @PostMapping("/login")
+    @Operation(
+        summary = "Fazer login",
+        description = "Autentica um usuário com email e senha, retornando um token JWT válido",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = LoginRequest.class),
+                examples = @ExampleObject(
+                    name = "Login Admin",
+                    value = "{\"email\": \"admin@local\", \"senha\": \"admin\"}"
+                )
+            )
+        )
+    )
+    @ApiResponse(responseCode = "200", description = "Login realizado com sucesso", 
+                content = @Content(schema = @Schema(implementation = AuthResponse.class)))
+    @ApiResponse(responseCode = "401", description = "Credenciais inválidas")
+    @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest request) {
         try {
             log.debug("[AUTH] Login attempt for email={}", request.getEmail());
@@ -89,7 +126,20 @@ public class AuthController {
         }
     }
 
+    /**
+     * Retorna informações do usuário autenticado.
+     * 
+     * @return Dados do usuário autenticado e suas permissões
+     */
     @GetMapping("/me")
+    @Operation(
+        summary = "Dados do usuário autenticado",
+        description = "Retorna informações do usuário atualmente autenticado e suas permissões"
+    )
+    @ApiResponse(responseCode = "200", description = "Dados do usuário retornados com sucesso",
+                content = @Content(schema = @Schema(implementation = AuthResponse.class)))
+    @ApiResponse(responseCode = "401", description = "Token JWT inválido ou ausente")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<AuthResponse> me() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
@@ -108,8 +158,25 @@ public class AuthController {
         return ResponseEntity.ok(resp);
     }
 
+    /**
+     * Renova um token JWT existente.
+     * 
+     * @param authorization Header Authorization com o token atual (Bearer token)
+     * @return Novo token JWT com validade renovada
+     */
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refresh(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
+    @Operation(
+        summary = "Renovar token JWT",
+        description = "Gera um novo token JWT a partir de um token existente (mesmo que expirado)"
+    )
+    @ApiResponse(responseCode = "200", description = "Token renovado com sucesso",
+                content = @Content(schema = @Schema(implementation = AuthResponse.class)))
+    @ApiResponse(responseCode = "401", description = "Token inválido ou usuário não encontrado")
+    @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<AuthResponse> refresh(
+        @Parameter(description = "Token JWT no formato 'Bearer {token}'", example = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
         try {
             if (!StringUtils.hasText(authorization) || !authorization.startsWith("Bearer ")) {
                 return ResponseEntity.status(401).build();

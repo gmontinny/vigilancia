@@ -2,20 +2,31 @@ package br.gov.mt.vigilancia.saude.controller;
 
 import br.gov.mt.vigilancia.saude.dto.AgrupamentoDTO;
 import br.gov.mt.vigilancia.saude.service.AgrupamentoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Controller para consulta de agrupamentos.
+ */
 @RestController
 @RequestMapping("/agrupamentos")
+@Tag(name = "Agrupamentos", description = "Consulta de agrupamentos")
+@SecurityRequirement(name = "bearerAuth")
 public class AgrupamentoController {
 
     @Autowired
     private AgrupamentoService agrupamentoService;
 
     @GetMapping
+    @Operation(summary = "Listar agrupamentos", description = "Retorna todos os agrupamentos cadastrados")
+    @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     public ResponseEntity<List<AgrupamentoDTO>> getAllAgrupamentos() {
         return ResponseEntity.ok(agrupamentoService.findAll());
     }

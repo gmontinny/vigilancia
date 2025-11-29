@@ -39,6 +39,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // OpenAPI/Swagger (springdoc) - UI e geração do contrato OpenAPI 3
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14'
+
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'
 
