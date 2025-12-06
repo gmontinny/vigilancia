@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +31,10 @@ public class BalancomedicamentoController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = BalancomedicamentoDTO.class)))
+                            schema = @Schema(implementation = BalancomedicamentoDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<List<BalancomedicamentoDTO>> getAllBalancomedicamentos() {
         return ResponseEntity.ok(balancomedicamentoService.findAll());
     }
@@ -43,8 +46,10 @@ public class BalancomedicamentoController {
             @ApiResponse(responseCode = "200", description = "Registro encontrado",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = BalancomedicamentoDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido"),
             @ApiResponse(responseCode = "404", description = "Registro não encontrado")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<BalancomedicamentoDTO> getBalancomedicamentoById(
             @Parameter(description = "Identificador do balanço de medicamentos", example = "1")
             @PathVariable Integer id) {
@@ -59,8 +64,10 @@ public class BalancomedicamentoController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Registro criado com sucesso",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = BalancomedicamentoDTO.class)))
+                            schema = @Schema(implementation = BalancomedicamentoDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<BalancomedicamentoDTO> createBalancomedicamento(
             @RequestBody(description = "Dados do balanço de medicamentos a ser criado", required = true,
                     content = @Content(mediaType = "application/json",
@@ -76,8 +83,10 @@ public class BalancomedicamentoController {
             @ApiResponse(responseCode = "200", description = "Registro atualizado",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = BalancomedicamentoDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido"),
             @ApiResponse(responseCode = "404", description = "Registro não encontrado")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<BalancomedicamentoDTO> updateBalancomedicamento(
             @Parameter(description = "Identificador do balanço de medicamentos", example = "1")
             @PathVariable Integer id,
@@ -98,8 +107,10 @@ public class BalancomedicamentoController {
             description = "Remove um registro de balanço de medicamentos pelo seu ID")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Exclusão realizada com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido"),
             @ApiResponse(responseCode = "404", description = "Registro não encontrado")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> deleteBalancomedicamento(
             @Parameter(description = "Identificador do balanço de medicamentos", example = "1")
             @PathVariable Integer id) {

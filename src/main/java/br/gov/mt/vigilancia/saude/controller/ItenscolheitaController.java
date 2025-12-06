@@ -2,6 +2,15 @@ package br.gov.mt.vigilancia.saude.controller;
 
 import br.gov.mt.vigilancia.saude.dto.ItenscolheitaDTO;
 import br.gov.mt.vigilancia.saude.service.ItenscolheitaService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,30 +19,43 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/itenscolheitas")
+@Tag(name = "Itens de Colheita", description = "Operações CRUD para itens de colheita")
 public class ItenscolheitaController {
 
     @Autowired
     private ItenscolheitaService itenscolheitaService;
 
     @GetMapping
+    @Operation(summary = "Listar itens de colheita", description = "Retorna a lista completa de itens de colheita cadastrados")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Lista retornada com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ItenscolheitaDTO.class))), @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido")})
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<List<ItenscolheitaDTO>> getAllItenscolheitas() {
         return ResponseEntity.ok(itenscolheitaService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ItenscolheitaDTO> getItenscolheitaById(@PathVariable Integer id) {
+    @Operation(summary = "Buscar item de colheita por ID", description = "Retorna um item de colheita pelo seu identificador")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Registro encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ItenscolheitaDTO.class))), @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido"), @ApiResponse(responseCode = "404", description = "Registro não encontrado")})
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ItenscolheitaDTO> getItenscolheitaById(@Parameter(description = "Identificador do item de colheita", example = "1") @PathVariable Integer id) {
         return itenscolheitaService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<ItenscolheitaDTO> createItenscolheita(@RequestBody ItenscolheitaDTO itenscolheitaDTO) {
+    @Operation(summary = "Criar item de colheita", description = "Cria um novo item de colheita")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Registro criado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ItenscolheitaDTO.class))), @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido")})
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ItenscolheitaDTO> createItenscolheita(@Valid @RequestBody ItenscolheitaDTO itenscolheitaDTO) {
         return ResponseEntity.ok(itenscolheitaService.save(itenscolheitaDTO));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ItenscolheitaDTO> updateItenscolheita(@PathVariable Integer id, @RequestBody ItenscolheitaDTO itenscolheitaDTO) {
+    @Operation(summary = "Atualizar item de colheita", description = "Atualiza um item de colheita existente pelo seu ID")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Registro atualizado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ItenscolheitaDTO.class))), @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido"), @ApiResponse(responseCode = "404", description = "Registro não encontrado")})
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ItenscolheitaDTO> updateItenscolheita(@Parameter(description = "Identificador do item de colheita", example = "1") @PathVariable Integer id, @Valid @RequestBody ItenscolheitaDTO itenscolheitaDTO) {
         return itenscolheitaService.findById(id)
                 .map(existingItenscolheitaDTO -> {
                     itenscolheitaDTO.setIditenscolheita(id);
@@ -43,7 +65,10 @@ public class ItenscolheitaController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteItenscolheita(@PathVariable Integer id) {
+    @Operation(summary = "Excluir item de colheita", description = "Remove um item de colheita pelo seu ID")
+    @ApiResponses({@ApiResponse(responseCode = "204", description = "Exclusão realizada com sucesso"), @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido"), @ApiResponse(responseCode = "404", description = "Registro não encontrado")})
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<Void> deleteItenscolheita(@Parameter(description = "Identificador do item de colheita", example = "1") @PathVariable Integer id) {
         itenscolheitaService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

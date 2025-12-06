@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +30,10 @@ public class DespachocontrarazaoController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = DespachocontrarazaoDTO.class)))
+                            schema = @Schema(implementation = DespachocontrarazaoDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<List<DespachocontrarazaoDTO>> getAllDespachocontrarazoes() {
         return ResponseEntity.ok(despachocontrarazaoService.findAll());
     }
@@ -41,8 +44,10 @@ public class DespachocontrarazaoController {
             @ApiResponse(responseCode = "200", description = "Registro encontrado",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = DespachocontrarazaoDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido"),
             @ApiResponse(responseCode = "404", description = "Registro não encontrado")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<DespachocontrarazaoDTO> getDespachocontrarazaoById(
             @Parameter(description = "Identificador do despacho de contrarrazão", example = "1")
             @PathVariable Integer id) {
@@ -56,8 +61,10 @@ public class DespachocontrarazaoController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Registro criado com sucesso",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = DespachocontrarazaoDTO.class)))
+                            schema = @Schema(implementation = DespachocontrarazaoDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<DespachocontrarazaoDTO> createDespachocontrarazao(
             @RequestBody(description = "Dados do despacho de contrarrazão a ser criado", required = true,
                     content = @Content(mediaType = "application/json",
@@ -72,8 +79,10 @@ public class DespachocontrarazaoController {
             @ApiResponse(responseCode = "200", description = "Registro atualizado",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = DespachocontrarazaoDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido"),
             @ApiResponse(responseCode = "404", description = "Registro não encontrado")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<DespachocontrarazaoDTO> updateDespachocontrarazao(
             @Parameter(description = "Identificador do despacho de contrarrazão", example = "1")
             @PathVariable Integer id,
@@ -93,8 +102,10 @@ public class DespachocontrarazaoController {
     @Operation(summary = "Excluir despacho de contrarrazão", description = "Remove um despacho de contrarrazão pelo seu ID")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Exclusão realizada com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autorizado - Token JWT inválido"),
             @ApiResponse(responseCode = "404", description = "Registro não encontrado")
     })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> deleteDespachocontrarazao(
             @Parameter(description = "Identificador do despacho de contrarrazão", example = "1")
             @PathVariable Integer id) {

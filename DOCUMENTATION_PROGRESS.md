@@ -85,6 +85,46 @@
 - ✅ **AgrupamentoController**: Consulta de agrupamentos
 - ✅ **AnaliseprocessoController**: Consulta de análises de processo
 
+#### G. Controllers de Funcionalidades Diversas
+- ✅ **FabrilController**: Consulta de dados fabris
+- ✅ **MensagemController**: Consulta de mensagens do sistema
+- ✅ **TimelineController**: Consulta de linhas do tempo
+- ✅ **AreainspecaoController**: Gerenciamento de áreas de inspeção (CRUD)
+- ✅ **ArquitetonicoController**: Gerenciamento de dados arquitetônicos (CRUD)
+- ✅ **AtividadesController**: Gerenciamento de atividades (CRUD)
+- ✅ **BalancomedicamentoController**: Gerenciamento de balanços de medicamentos (CRUD)
+- ✅ **BloqueioitenssolicitacaoController**: Gerenciamento de bloqueios de itens de solicitação (CRUD)
+
+#### H. Controllers de Categorias e Documentos
+- ✅ **CarteirinhaController**: Gerenciamento de carteirinhas (CRUD)
+- ✅ **CategoriaanaliseController**: Gerenciamento de categorias de análise (CRUD)
+- ✅ **CategoriaprodutoController**: Gerenciamento de categorias de produto (CRUD)
+- ✅ **CategoriaroteiroController**: Gerenciamento de categorias de roteiro (CRUD)
+- ✅ **CategoriaservicoController**: Gerenciamento de categorias de serviço (CRUD)
+- ✅ **DespachocontrarazaoController**: Gerenciamento de despachos de contrarrazão (CRUD)
+- ✅ **DocnecessarioController**: Gerenciamento de documentos necessários (CRUD)
+- ✅ **DocumentoerradoController**: Gerenciamento de documentos errados (CRUD)
+
+#### I. Controllers de Empresas, Entregadores e Itens
+- ✅ **EmpresainfracoeController**: Gerenciamento de infrações de empresas (CRUD)
+- ✅ **EntregadorController**: Gerenciamento de entregadores (CRUD)
+- ✅ **ExiberoteiroController**: Gerenciamento de exibição de roteiros (CRUD)
+- ✅ **FarmaceuticoController**: Gerenciamento de farmacêuticos (CRUD)
+- ✅ **ItensatividadeController**: Gerenciamento de itens de atividade (CRUD)
+- ✅ **ItensautoinfracaoController**: Gerenciamento de itens de auto de infração (CRUD)
+- ✅ **ItensavaliacaoController**: Gerenciamento de itens de avaliação (CRUD)
+- ✅ **ItenscategoriaservicoController**: Gerenciamento de itens de categoria de serviço (CRUD)
+
+#### J. Controllers de Itens Adicionais
+- ✅ **ItenscolheitaController**: Gerenciamento de itens de colheita (CRUD)
+- ✅ **ItensdocumentoController**: Gerenciamento de itens de documento (CRUD)
+- ✅ **ItensembalagemController**: Gerenciamento de itens de embalagem (CRUD)
+- ✅ **ItensexiberoteiroController**: Gerenciamento de itens de exibir roteiro (CRUD)
+- ✅ **ItensgaleriaController**: Gerenciamento de itens de galeria (CRUD)
+- ✅ **ItensrelatorioController**: Gerenciamento de itens de relatório (CRUD)
+- ✅ **ItensroteiroController**: Gerenciamento de itens de roteiro (CRUD)
+- ✅ **ItenssolicitacaoController**: Gerenciamento de itens de solicitação (CRUD)
+
 ## Padrões Implementados
 
 ### 1. Anotações OpenAPI Utilizadas
@@ -156,37 +196,44 @@ Controllers principais já documentados. Restam controllers por funcionalidades:
 - Criar DTOs específicos para requests/responses
 - Implementar testes automatizados
 
-## Sétima Etapa Concluída ✅
+## Décima Etapa Concluída ✅
 
-### Controllers Documentados na Sétima Etapa
-- **8 controllers de sistema legado e administrativos**: DocumentoController, CupomautoController, GeraautoController, RespostaController, BaixaController, AdministrativoController, AgrupamentoController, AnaliseprocessoController
-- **Foco em sistema legado** e funcionalidades administrativas
+### Controllers Documentados na Décima Etapa
+- **8 controllers de empresas, entregadores e itens**: EmpresainfracoeController, EntregadorController, ExiberoteiroController, FarmaceuticoController, ItensatividadeController, ItensautoinfracaoController, ItensavaliacaoController, ItenscategoriaservicoController
+- **Foco em empresas e itens**: infrações de empresas, entregadores, farmacêuticos, exibição de roteiros e diversos tipos de itens
+- **8 controllers CRUD completos** adicionados
 - **Total de 8 controllers** adicionados nesta etapa
 
-### Resumo Geral das Sete Etapas
-- **14 controllers CRUD** com documentação completa (✅ TODOS + 1 administrativo)
-- **39 controllers de consulta/sistema** documentados
-- **53 controllers totais** documentados (40.8% do projeto)
+### Resumo Geral das Dez Etapas
+- **33 controllers CRUD** com documentação completa
+- **44 controllers de consulta/sistema** documentados
+- **77 controllers totais** documentados (59.2% do projeto)
 - **Padrões consolidados** aplicados em todos
 - **Validação @Valid** adicionada onde necessário
 - **Segurança JWT** documentada em todos os endpoints
 
 ### 🏆 Marcos Alcançados
-- ✅ **TODOS os controllers CRUD** documentados
+- ✅ **33 controllers CRUD** documentados
 - ✅ **Controllers de sistema principais** documentados
 - ✅ **Controllers mais utilizados** por domínio documentados
 - ✅ **Controllers de sistema legado** documentados
-- ✅ **Mais de 40% do projeto** documentado
+- ✅ **Controllers de funcionalidades diversas** documentados
+- ✅ **Controllers de categorias** documentados
+- ✅ **Controllers de itens** documentados
+- ✅ **Quase 60% do projeto** documentado
 
 ## Progresso Excepcional Alcançado 🎆
 
-### 53 Controllers Documentados (40.8%)
+### 77 Controllers Documentados (59.2%)
 - **Base sólida** estabelecida com padrões consistentes
-- **Todos os CRUDs** e **controllers principais** documentados
+- **33 controllers CRUD** completamente documentados
 - **Funcionalidades core** da vigilância sanitária documentadas
 - **Sistema legado** e funcionalidades administrativas documentadas
+- **Funcionalidades diversas** (mensagens, timelines, dados fabris) documentadas
+- **Sistema de categorias** completamente documentado
+- **Sistema de itens** documentado (atividades, infrações, avaliações, categorias)
 - **Documentação funcional** e acessível via Swagger UI
-- **Padrões replicaveis** para os 77 controllers restantes
+- **Padrões replicaveis** para os 53 controllers restantes
 
 ## Comandos Úteis
 
@@ -216,7 +263,7 @@ curl -H "Authorization: Bearer {token}" \
 
 ---
 
-**Status**: 53 de 130 controllers documentados (40.8%)
-**Sétima etapa concluída**: Controllers de sistema legado e administrativos documentados
-**Próxima etapa**: Controllers restantes por funcionalidades específicas
+**Status**: 85 de 130 controllers documentados (65.4%)
+**Décima primeira etapa concluída**: Controllers de itens (colheita, documento, embalagem, exibir roteiro, galeria, relatório, roteiro, solicitação) documentados
+**Próxima etapa**: Controllers restantes (legislação, notificações, processos, geradores, etc.)
 **Última atualização**: 2025-01-08
