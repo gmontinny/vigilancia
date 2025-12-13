@@ -22,4 +22,30 @@ public class AcaoService {
                 .map(acaoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public AcaoDTO findById(Integer id) {
+        return acaoRepository.findById(id)
+                .map(acaoMapper::toDto)
+                .orElse(null);
+    }
+
+    public AcaoDTO save(AcaoDTO acaoDTO) {
+        var entity = acaoMapper.toEntity(acaoDTO);
+        var saved = acaoRepository.save(entity);
+        return acaoMapper.toDto(saved);
+    }
+
+    public AcaoDTO update(Integer id, AcaoDTO acaoDTO) {
+        return acaoRepository.findById(id)
+                .map(existing -> {
+                    var entity = acaoMapper.toEntity(acaoDTO);
+                    entity.setId(id);
+                    return acaoMapper.toDto(acaoRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        acaoRepository.deleteById(id);
+    }
 }

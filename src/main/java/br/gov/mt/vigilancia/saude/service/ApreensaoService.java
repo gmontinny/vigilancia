@@ -22,4 +22,19 @@ public class ApreensaoService {
                 .map(apreensaoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<ApreensaoDTO> findById(Integer id) {
+        return apreensaoRepository.findById(id)
+                .map(apreensaoMapper::toDto);
+    }
+
+    public ApreensaoDTO save(ApreensaoDTO apreensaoDTO) {
+        var entity = apreensaoMapper.toEntity(apreensaoDTO);
+        var saved = apreensaoRepository.save(entity);
+        return apreensaoMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        apreensaoRepository.deleteById(id);
+    }
 }

@@ -22,4 +22,19 @@ public class TabelaService {
                 .map(tabelaMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<TabelaDTO> findById(Integer id) {
+        return tabelaRepository.findById(id)
+                .map(tabelaMapper::toDto);
+    }
+
+    public TabelaDTO save(TabelaDTO tabelaDTO) {
+        var entity = tabelaMapper.toEntity(tabelaDTO);
+        var saved = tabelaRepository.save(entity);
+        return tabelaMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        tabelaRepository.deleteById(id);
+    }
 }

@@ -22,4 +22,30 @@ public class ReclamacaoService {
                 .map(reclamacaoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public ReclamacaoDTO findById(Integer id) {
+        return reclamacaoRepository.findById(id)
+                .map(reclamacaoMapper::toDto)
+                .orElse(null);
+    }
+
+    public ReclamacaoDTO save(ReclamacaoDTO reclamacaoDTO) {
+        var entity = reclamacaoMapper.toEntity(reclamacaoDTO);
+        var saved = reclamacaoRepository.save(entity);
+        return reclamacaoMapper.toDto(saved);
+    }
+
+    public ReclamacaoDTO update(Integer id, ReclamacaoDTO reclamacaoDTO) {
+        return reclamacaoRepository.findById(id)
+                .map(existing -> {
+                    var entity = reclamacaoMapper.toEntity(reclamacaoDTO);
+
+                    return reclamacaoMapper.toDto(reclamacaoRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        reclamacaoRepository.deleteById(id);
+    }
 }

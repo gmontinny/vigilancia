@@ -22,4 +22,30 @@ public class GaleriaService {
                 .map(galeriaMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public GaleriaDTO findById(Integer id) {
+        return galeriaRepository.findById(id)
+                .map(galeriaMapper::toDto)
+                .orElse(null);
+    }
+
+    public GaleriaDTO save(GaleriaDTO galeriaDTO) {
+        var entity = galeriaMapper.toEntity(galeriaDTO);
+        var saved = galeriaRepository.save(entity);
+        return galeriaMapper.toDto(saved);
+    }
+
+    public GaleriaDTO update(Integer id, GaleriaDTO galeriaDTO) {
+        return galeriaRepository.findById(id)
+                .map(existing -> {
+                    var entity = galeriaMapper.toEntity(galeriaDTO);
+
+                    return galeriaMapper.toDto(galeriaRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        galeriaRepository.deleteById(id);
+    }
 }

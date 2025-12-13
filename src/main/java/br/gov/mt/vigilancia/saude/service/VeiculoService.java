@@ -22,4 +22,19 @@ public class VeiculoService {
                 .map(veiculoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<VeiculoDTO> findById(Integer id) {
+        return veiculoRepository.findById(id)
+                .map(veiculoMapper::toDto);
+    }
+
+    public VeiculoDTO save(VeiculoDTO veiculoDTO) {
+        var entity = veiculoMapper.toEntity(veiculoDTO);
+        var saved = veiculoRepository.save(entity);
+        return veiculoMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        veiculoRepository.deleteById(id);
+    }
 }

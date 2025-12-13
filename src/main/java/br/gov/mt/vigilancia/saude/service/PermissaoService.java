@@ -22,4 +22,19 @@ public class PermissaoService {
                 .map(permissaoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<PermissaoDTO> findById(Integer id) {
+        return permissaoRepository.findById(id)
+                .map(permissaoMapper::toDto);
+    }
+
+    public PermissaoDTO save(PermissaoDTO permissaoDTO) {
+        var entity = permissaoMapper.toEntity(permissaoDTO);
+        var saved = permissaoRepository.save(entity);
+        return permissaoMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        permissaoRepository.deleteById(id);
+    }
 }

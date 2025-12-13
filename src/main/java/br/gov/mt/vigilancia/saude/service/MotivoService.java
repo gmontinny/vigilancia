@@ -22,4 +22,30 @@ public class MotivoService {
                 .map(motivoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public MotivoDTO findById(Integer id) {
+        return motivoRepository.findById(id)
+                .map(motivoMapper::toDto)
+                .orElse(null);
+    }
+
+    public MotivoDTO save(MotivoDTO motivoDTO) {
+        var entity = motivoMapper.toEntity(motivoDTO);
+        var saved = motivoRepository.save(entity);
+        return motivoMapper.toDto(saved);
+    }
+
+    public MotivoDTO update(Integer id, MotivoDTO motivoDTO) {
+        return motivoRepository.findById(id)
+                .map(existing -> {
+                    var entity = motivoMapper.toEntity(motivoDTO);
+
+                    return motivoMapper.toDto(motivoRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        motivoRepository.deleteById(id);
+    }
 }

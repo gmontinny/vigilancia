@@ -22,4 +22,30 @@ public class FiscalService {
                 .map(fiscalMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public FiscalDTO findById(Integer id) {
+        return fiscalRepository.findById(id)
+                .map(fiscalMapper::toDto)
+                .orElse(null);
+    }
+
+    public FiscalDTO save(FiscalDTO fiscalDTO) {
+        var entity = fiscalMapper.toEntity(fiscalDTO);
+        var saved = fiscalRepository.save(entity);
+        return fiscalMapper.toDto(saved);
+    }
+
+    public FiscalDTO update(Integer id, FiscalDTO fiscalDTO) {
+        return fiscalRepository.findById(id)
+                .map(existing -> {
+                    var entity = fiscalMapper.toEntity(fiscalDTO);
+
+                    return fiscalMapper.toDto(fiscalRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        fiscalRepository.deleteById(id);
+    }
 }

@@ -22,4 +22,19 @@ public class UsuarioService {
                 .map(usuarioMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<UsuarioDTO> findById(Integer id) {
+        return usuarioRepository.findById(id)
+                .map(usuarioMapper::toDto);
+    }
+
+    public UsuarioDTO save(UsuarioDTO usuarioDTO) {
+        var entity = usuarioMapper.toEntity(usuarioDTO);
+        var saved = usuarioRepository.save(entity);
+        return usuarioMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        usuarioRepository.deleteById(id);
+    }
 }

@@ -22,4 +22,30 @@ public class LicenciaService {
                 .map(licenciaMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public LicenciaDTO findById(Integer id) {
+        return licenciaRepository.findById(id)
+                .map(licenciaMapper::toDto)
+                .orElse(null);
+    }
+
+    public LicenciaDTO save(LicenciaDTO licenciaDTO) {
+        var entity = licenciaMapper.toEntity(licenciaDTO);
+        var saved = licenciaRepository.save(entity);
+        return licenciaMapper.toDto(saved);
+    }
+
+    public LicenciaDTO update(Integer id, LicenciaDTO licenciaDTO) {
+        return licenciaRepository.findById(id)
+                .map(existing -> {
+                    var entity = licenciaMapper.toEntity(licenciaDTO);
+
+                    return licenciaMapper.toDto(licenciaRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        licenciaRepository.deleteById(id);
+    }
 }

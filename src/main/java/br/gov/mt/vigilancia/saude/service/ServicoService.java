@@ -22,4 +22,30 @@ public class ServicoService {
                 .map(servicoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public ServicoDTO findById(Integer id) {
+        return servicoRepository.findById(id)
+                .map(servicoMapper::toDto)
+                .orElse(null);
+    }
+
+    public ServicoDTO save(ServicoDTO servicoDTO) {
+        var entity = servicoMapper.toEntity(servicoDTO);
+        var saved = servicoRepository.save(entity);
+        return servicoMapper.toDto(saved);
+    }
+
+    public ServicoDTO update(Integer id, ServicoDTO servicoDTO) {
+        return servicoRepository.findById(id)
+                .map(existing -> {
+                    var entity = servicoMapper.toEntity(servicoDTO);
+
+                    return servicoMapper.toDto(servicoRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        servicoRepository.deleteById(id);
+    }
 }

@@ -22,4 +22,19 @@ public class BaixaService {
                 .map(baixaMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<BaixaDTO> findById(Integer id) {
+        return baixaRepository.findById(id)
+                .map(baixaMapper::toDto);
+    }
+
+    public BaixaDTO save(BaixaDTO baixaDTO) {
+        var entity = baixaMapper.toEntity(baixaDTO);
+        var saved = baixaRepository.save(entity);
+        return baixaMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        baixaRepository.deleteById(id);
+    }
 }

@@ -22,4 +22,30 @@ public class BpaService {
                 .map(bpaMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public BpaDTO findById(Integer id) {
+        return bpaRepository.findById(id)
+                .map(bpaMapper::toDto)
+                .orElse(null);
+    }
+
+    public BpaDTO save(BpaDTO bpaDTO) {
+        var entity = bpaMapper.toEntity(bpaDTO);
+        var saved = bpaRepository.save(entity);
+        return bpaMapper.toDto(saved);
+    }
+
+    public BpaDTO update(Integer id, BpaDTO bpaDTO) {
+        return bpaRepository.findById(id)
+                .map(existing -> {
+                    var entity = bpaMapper.toEntity(bpaDTO);
+                    entity.setId(id);
+                    return bpaMapper.toDto(bpaRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        bpaRepository.deleteById(id);
+    }
 }

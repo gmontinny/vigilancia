@@ -22,4 +22,30 @@ public class RoteiroService {
                 .map(roteiroMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public RoteiroDTO findById(Integer id) {
+        return roteiroRepository.findById(id)
+                .map(roteiroMapper::toDto)
+                .orElse(null);
+    }
+
+    public RoteiroDTO save(RoteiroDTO roteiroDTO) {
+        var entity = roteiroMapper.toEntity(roteiroDTO);
+        var saved = roteiroRepository.save(entity);
+        return roteiroMapper.toDto(saved);
+    }
+
+    public RoteiroDTO update(Integer id, RoteiroDTO roteiroDTO) {
+        return roteiroRepository.findById(id)
+                .map(existing -> {
+                    var entity = roteiroMapper.toEntity(roteiroDTO);
+
+                    return roteiroMapper.toDto(roteiroRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        roteiroRepository.deleteById(id);
+    }
 }

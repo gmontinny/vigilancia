@@ -15,4 +15,9 @@ public interface UsuarioMapper {
     @Mapping(source = "fiscais", target = "fiscais")
     @Mapping(source = "permissoes", target = "permissoes")
     UsuarioDTO toDto(Usuario usuario);
+
+    @Mapping(target = "enderecos", ignore = true)
+    @Mapping(target = "fiscais", ignore = true)
+    @Mapping(target = "permissoes", ignore = true)
+    Usuario toEntity(UsuarioDTO usuarioDTO);
 }

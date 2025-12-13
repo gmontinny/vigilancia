@@ -22,4 +22,19 @@ public class MensagemService {
                 .map(mensagemMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<MensagemDTO> findById(Integer id) {
+        return mensagemRepository.findById(id)
+                .map(mensagemMapper::toDto);
+    }
+
+    public MensagemDTO save(MensagemDTO mensagemDTO) {
+        var entity = mensagemMapper.toEntity(mensagemDTO);
+        var saved = mensagemRepository.save(entity);
+        return mensagemMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        mensagemRepository.deleteById(id);
+    }
 }

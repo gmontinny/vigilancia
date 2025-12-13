@@ -22,4 +22,19 @@ public class RespostaService {
                 .map(respostaMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<RespostaDTO> findById(Integer id) {
+        return respostaRepository.findById(id)
+                .map(respostaMapper::toDto);
+    }
+
+    public RespostaDTO save(RespostaDTO respostaDTO) {
+        var entity = respostaMapper.toEntity(respostaDTO);
+        var saved = respostaRepository.save(entity);
+        return respostaMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        respostaRepository.deleteById(id);
+    }
 }

@@ -22,4 +22,19 @@ public class EstabelecimentoService {
                 .map(estabelecimentoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<EstabelecimentoDTO> findById(Integer id) {
+        return estabelecimentoRepository.findById(id)
+                .map(estabelecimentoMapper::toDto);
+    }
+
+    public EstabelecimentoDTO save(EstabelecimentoDTO estabelecimentoDTO) {
+        var entity = estabelecimentoMapper.toEntity(estabelecimentoDTO);
+        var saved = estabelecimentoRepository.save(entity);
+        return estabelecimentoMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        estabelecimentoRepository.deleteById(id);
+    }
 }

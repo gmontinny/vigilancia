@@ -22,4 +22,19 @@ public class ProdiService {
                 .map(prodiMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<ProdiDTO> findById(Integer id) {
+        return prodiRepository.findById(id)
+                .map(prodiMapper::toDto);
+    }
+
+    public ProdiDTO save(ProdiDTO prodiDTO) {
+        var entity = prodiMapper.toEntity(prodiDTO);
+        var saved = prodiRepository.save(entity);
+        return prodiMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        prodiRepository.deleteById(id);
+    }
 }

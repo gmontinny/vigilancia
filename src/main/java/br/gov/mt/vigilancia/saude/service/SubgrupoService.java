@@ -22,4 +22,19 @@ public class SubgrupoService {
                 .map(subgrupoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<SubgrupoDTO> findById(Integer id) {
+        return subgrupoRepository.findById(id)
+                .map(subgrupoMapper::toDto);
+    }
+
+    public SubgrupoDTO save(SubgrupoDTO subgrupoDTO) {
+        var entity = subgrupoMapper.toEntity(subgrupoDTO);
+        var saved = subgrupoRepository.save(entity);
+        return subgrupoMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        subgrupoRepository.deleteById(id);
+    }
 }

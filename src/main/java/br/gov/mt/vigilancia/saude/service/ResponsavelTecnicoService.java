@@ -22,4 +22,30 @@ public class ResponsavelTecnicoService {
                 .map(responsavelTecnicoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public ResponsavelTecnicoDTO findById(Integer id) {
+        return responsavelTecnicoRepository.findById(id)
+                .map(responsavelTecnicoMapper::toDto)
+                .orElse(null);
+    }
+
+    public ResponsavelTecnicoDTO save(ResponsavelTecnicoDTO responsavelTecnicoDTO) {
+        var entity = responsavelTecnicoMapper.toEntity(responsavelTecnicoDTO);
+        var saved = responsavelTecnicoRepository.save(entity);
+        return responsavelTecnicoMapper.toDto(saved);
+    }
+
+    public ResponsavelTecnicoDTO update(Integer id, ResponsavelTecnicoDTO responsavelTecnicoDTO) {
+        return responsavelTecnicoRepository.findById(id)
+                .map(existing -> {
+                    var entity = responsavelTecnicoMapper.toEntity(responsavelTecnicoDTO);
+
+                    return responsavelTecnicoMapper.toDto(responsavelTecnicoRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        responsavelTecnicoRepository.deleteById(id);
+    }
 }

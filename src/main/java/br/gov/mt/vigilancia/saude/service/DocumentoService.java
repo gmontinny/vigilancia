@@ -22,4 +22,30 @@ public class DocumentoService {
                 .map(documentoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public DocumentoDTO findById(Integer id) {
+        return documentoRepository.findById(id)
+                .map(documentoMapper::toDto)
+                .orElse(null);
+    }
+
+    public DocumentoDTO save(DocumentoDTO documentoDTO) {
+        var entity = documentoMapper.toEntity(documentoDTO);
+        var saved = documentoRepository.save(entity);
+        return documentoMapper.toDto(saved);
+    }
+
+    public DocumentoDTO update(Integer id, DocumentoDTO documentoDTO) {
+        return documentoRepository.findById(id)
+                .map(existing -> {
+                    var entity = documentoMapper.toEntity(documentoDTO);
+
+                    return documentoMapper.toDto(documentoRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        documentoRepository.deleteById(id);
+    }
 }

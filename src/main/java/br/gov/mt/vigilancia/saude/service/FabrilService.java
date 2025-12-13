@@ -22,4 +22,19 @@ public class FabrilService {
                 .map(fabrilMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<FabrilDTO> findById(Integer id) {
+        return fabrilRepository.findById(id)
+                .map(fabrilMapper::toDto);
+    }
+
+    public FabrilDTO save(FabrilDTO fabrilDTO) {
+        var entity = fabrilMapper.toEntity(fabrilDTO);
+        var saved = fabrilRepository.save(entity);
+        return fabrilMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        fabrilRepository.deleteById(id);
+    }
 }

@@ -22,4 +22,30 @@ public class ProdutoService {
                 .map(produtoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public ProdutoDTO findById(Integer id) {
+        return produtoRepository.findById(id)
+                .map(produtoMapper::toDto)
+                .orElse(null);
+    }
+
+    public ProdutoDTO save(ProdutoDTO produtoDTO) {
+        var entity = produtoMapper.toEntity(produtoDTO);
+        var saved = produtoRepository.save(entity);
+        return produtoMapper.toDto(saved);
+    }
+
+    public ProdutoDTO update(Integer id, ProdutoDTO produtoDTO) {
+        return produtoRepository.findById(id)
+                .map(existing -> {
+                    var entity = produtoMapper.toEntity(produtoDTO);
+
+                    return produtoMapper.toDto(produtoRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        produtoRepository.deleteById(id);
+    }
 }

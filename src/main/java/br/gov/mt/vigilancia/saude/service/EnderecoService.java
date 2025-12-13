@@ -22,4 +22,19 @@ public class EnderecoService {
                 .map(enderecoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<EnderecoDTO> findById(Integer id) {
+        return enderecoRepository.findById(id)
+                .map(enderecoMapper::toDto);
+    }
+
+    public EnderecoDTO save(EnderecoDTO enderecoDTO) {
+        var entity = enderecoMapper.toEntity(enderecoDTO);
+        var saved = enderecoRepository.save(entity);
+        return enderecoMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        enderecoRepository.deleteById(id);
+    }
 }

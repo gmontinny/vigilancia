@@ -22,4 +22,19 @@ public class GrupoService {
                 .map(grupoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<GrupoDTO> findById(Integer id) {
+        return grupoRepository.findById(id)
+                .map(grupoMapper::toDto);
+    }
+
+    public GrupoDTO save(GrupoDTO grupoDTO) {
+        var entity = grupoMapper.toEntity(grupoDTO);
+        var saved = grupoRepository.save(entity);
+        return grupoMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        grupoRepository.deleteById(id);
+    }
 }

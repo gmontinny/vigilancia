@@ -22,4 +22,29 @@ public class CategoriaService {
                 .map(categoriaMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public CategoriaDTO findById(Integer id) {
+        return categoriaRepository.findById(id)
+                .map(categoriaMapper::toDto)
+                .orElse(null);
+    }
+
+    public CategoriaDTO save(CategoriaDTO categoriaDTO) {
+        var entity = categoriaMapper.toEntity(categoriaDTO);
+        var saved = categoriaRepository.save(entity);
+        return categoriaMapper.toDto(saved);
+    }
+
+    public CategoriaDTO update(Integer id, CategoriaDTO categoriaDTO) {
+        return categoriaRepository.findById(id)
+                .map(existing -> {
+                    var entity = categoriaMapper.toEntity(categoriaDTO);
+                    return categoriaMapper.toDto(categoriaRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        categoriaRepository.deleteById(id);
+    }
 }

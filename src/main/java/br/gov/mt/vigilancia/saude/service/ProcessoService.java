@@ -22,4 +22,30 @@ public class ProcessoService {
                 .map(processoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public ProcessoDTO findById(String id) {
+        return processoRepository.findById(id)
+                .map(processoMapper::toDto)
+                .orElse(null);
+    }
+
+    public ProcessoDTO save(ProcessoDTO processoDTO) {
+        var entity = processoMapper.toEntity(processoDTO);
+        var saved = processoRepository.save(entity);
+        return processoMapper.toDto(saved);
+    }
+
+    public ProcessoDTO update(String id, ProcessoDTO processoDTO) {
+        return processoRepository.findById(id)
+                .map(existing -> {
+                    var entity = processoMapper.toEntity(processoDTO);
+
+                    return processoMapper.toDto(processoRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(String id) {
+        processoRepository.deleteById(id);
+    }
 }

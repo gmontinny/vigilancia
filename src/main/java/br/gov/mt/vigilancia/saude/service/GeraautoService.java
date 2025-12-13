@@ -22,4 +22,30 @@ public class GeraautoService {
                 .map(geraautoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public GeraautoDTO findById(Integer id) {
+        return geraautoRepository.findById(id)
+                .map(geraautoMapper::toDto)
+                .orElse(null);
+    }
+
+    public GeraautoDTO save(GeraautoDTO geraautoDTO) {
+        var entity = geraautoMapper.toEntity(geraautoDTO);
+        var saved = geraautoRepository.save(entity);
+        return geraautoMapper.toDto(saved);
+    }
+
+    public GeraautoDTO update(Integer id, GeraautoDTO geraautoDTO) {
+        return geraautoRepository.findById(id)
+                .map(existing -> {
+                    var entity = geraautoMapper.toEntity(geraautoDTO);
+
+                    return geraautoMapper.toDto(geraautoRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        geraautoRepository.deleteById(id);
+    }
 }

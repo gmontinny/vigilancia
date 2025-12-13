@@ -22,4 +22,19 @@ public class AlvaraService {
                 .map(alvaraMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<AlvaraDTO> findById(Integer id) {
+        return alvaraRepository.findById(id)
+                .map(alvaraMapper::toDto);
+    }
+
+    public AlvaraDTO save(AlvaraDTO alvaraDTO) {
+        var entity = alvaraMapper.toEntity(alvaraDTO);
+        var saved = alvaraRepository.save(entity);
+        return alvaraMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        alvaraRepository.deleteById(id);
+    }
 }

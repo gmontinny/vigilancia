@@ -22,4 +22,30 @@ public class UnidademedidaService {
                 .map(unidademedidaMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public UnidademedidaDTO findById(Integer id) {
+        return unidademedidaRepository.findById(id)
+                .map(unidademedidaMapper::toDto)
+                .orElse(null);
+    }
+
+    public UnidademedidaDTO save(UnidademedidaDTO unidademedidaDTO) {
+        var entity = unidademedidaMapper.toEntity(unidademedidaDTO);
+        var saved = unidademedidaRepository.save(entity);
+        return unidademedidaMapper.toDto(saved);
+    }
+
+    public UnidademedidaDTO update(Integer id, UnidademedidaDTO unidademedidaDTO) {
+        return unidademedidaRepository.findById(id)
+                .map(existing -> {
+                    var entity = unidademedidaMapper.toEntity(unidademedidaDTO);
+
+                    return unidademedidaMapper.toDto(unidademedidaRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        unidademedidaRepository.deleteById(id);
+    }
 }

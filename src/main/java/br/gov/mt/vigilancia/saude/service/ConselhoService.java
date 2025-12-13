@@ -22,4 +22,19 @@ public class ConselhoService {
                 .map(conselhoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<ConselhoDTO> findById(Integer id) {
+        return conselhoRepository.findById(id)
+                .map(conselhoMapper::toDto);
+    }
+
+    public ConselhoDTO save(ConselhoDTO conselhoDTO) {
+        var entity = conselhoMapper.toEntity(conselhoDTO);
+        var saved = conselhoRepository.save(entity);
+        return conselhoMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        conselhoRepository.deleteById(id);
+    }
 }

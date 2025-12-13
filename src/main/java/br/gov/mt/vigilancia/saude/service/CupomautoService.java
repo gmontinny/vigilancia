@@ -22,4 +22,19 @@ public class CupomautoService {
                 .map(cupomautoMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public java.util.Optional<CupomautoDTO> findById(Integer id) {
+        return cupomautoRepository.findById(id)
+                .map(cupomautoMapper::toDto);
+    }
+
+    public CupomautoDTO save(CupomautoDTO cupomautoDTO) {
+        var entity = cupomautoMapper.toEntity(cupomautoDTO);
+        var saved = cupomautoRepository.save(entity);
+        return cupomautoMapper.toDto(saved);
+    }
+
+    public void deleteById(Integer id) {
+        cupomautoRepository.deleteById(id);
+    }
 }

@@ -22,4 +22,30 @@ public class TipoEmpresaService {
                 .map(tipoEmpresaMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public TipoEmpresaDTO findById(Integer id) {
+        return tipoEmpresaRepository.findById(id)
+                .map(tipoEmpresaMapper::toDto)
+                .orElse(null);
+    }
+
+    public TipoEmpresaDTO save(TipoEmpresaDTO tipoEmpresaDTO) {
+        var entity = tipoEmpresaMapper.toEntity(tipoEmpresaDTO);
+        var saved = tipoEmpresaRepository.save(entity);
+        return tipoEmpresaMapper.toDto(saved);
+    }
+
+    public TipoEmpresaDTO update(Integer id, TipoEmpresaDTO tipoEmpresaDTO) {
+        return tipoEmpresaRepository.findById(id)
+                .map(existing -> {
+                    var entity = tipoEmpresaMapper.toEntity(tipoEmpresaDTO);
+
+                    return tipoEmpresaMapper.toDto(tipoEmpresaRepository.save(entity));
+                })
+                .orElse(null);
+    }
+
+    public void delete(Integer id) {
+        tipoEmpresaRepository.deleteById(id);
+    }
 }
