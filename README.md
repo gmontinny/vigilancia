@@ -2,13 +2,13 @@
 
 - Documentação interativa (Swagger UI): http://localhost:8081/swagger-ui/index.html
 - Contrato OpenAPI (JSON): http://localhost:8081/v3/api-docs
-- Lista completa de endpoints (CRUD e leitura): ver docs/README_ENDPOINTS.md
+- Lista completa de endpoints (CRUD e leitura): [docs/README_ENDPOINTS.md](docs/README_ENDPOINTS.md)
 
 Principais grupos:
 - Autenticação: `/auth/login`, `/auth/refresh`, `/auth/me`
 - Usuários: `/usuarios` (CRUD)
 - 2FA TOTP: `/usuarios/{id}/totp/register`, `/usuarios/{id}/totp/verify`, `/usuarios/{id}/totp/disable`
-- Demais domínios de negócio: ver docs/README_ENDPOINTS.md ou Swagger UI
+- Demais domínios de negócio: ver [docs/README_ENDPOINTS.md](docs/README_ENDPOINTS.md) ou Swagger UI
 
 ## Build, testes e qualidade
 - Compilar e rodar testes:
