@@ -152,11 +152,16 @@ A aplicação foi migrada de HTTP Basic para JWT, mantendo o domínio existente 
     - `JWT_EXP_SECONDS`: tempo de expiração em segundos (ex.: `3600`).
 
 - Endpoints de autenticação
-  - `POST /auth/login` — body:
-    ```json
-    { "email": "admin@local", "senha": "admin" }
-    ```
-    Resposta:
+  - `POST /auth/login` — body (informe senha e um identificador: email OU cpf):
+    - Por email:
+      ```json
+      { "email": "admin@local", "senha": "admin" }
+      ```
+    - Por CPF (com ou sem máscara):
+      ```json
+      { "cpf": "123.456.789-00", "senha": "admin" }
+      ```
+    Resposta (200):
     ```json
     {
       "token": "<JWT>",
@@ -191,12 +196,19 @@ A aplicação foi migrada de HTTP Basic para JWT, mantendo o domínio existente 
    ./gradlew bootRun
    ```
 2) Faça login e capture o token:
-   ```bash
-   TOKEN=$(curl -s -X POST http://localhost:8081/auth/login \
-     -H "Content-Type: application/json" \
-     -d '{"email":"admin@local","senha":"admin"}' | jq -r .token)
-   ```
-   Sem `jq`, apenas copie o campo `token` do JSON de resposta.
+    ```bash
+    TOKEN=$(curl -s -X POST http://localhost:8081/auth/login \
+      -H "Content-Type: application/json" \
+      -d '{"email":"admin@local","senha":"admin"}' | jq -r .token)
+    ```
+    Sem `jq`, apenas copie o campo `token` do JSON de resposta.
+    
+    Alternativa: login por CPF
+    ```bash
+    TOKEN=$(curl -s -X POST http://localhost:8081/auth/login \
+      -H "Content-Type: application/json" \
+      -d '{"cpf":"123.456.789-00","senha":"admin"}' | jq -r .token)
+    ```
 3) Chame um endpoint protegido usando o token:
    ```bash
    curl -H "Authorization: Bearer $TOKEN" http://localhost:8081/auth/me

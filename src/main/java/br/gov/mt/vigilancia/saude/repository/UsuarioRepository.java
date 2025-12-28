@@ -13,4 +13,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     @Query("select u from Usuario u left join fetch u.permissoes p left join fetch p.tabela where lower(u.email) = lower(:email)")
     Optional<Usuario> findByEmailWithPermissoes(@Param("email") String email);
+
+    @Query("select u from Usuario u left join fetch u.permissoes p left join fetch p.tabela where u.cpf = :cpf")
+    Optional<Usuario> findByCpfWithPermissoes(@Param("cpf") String cpf);
 }

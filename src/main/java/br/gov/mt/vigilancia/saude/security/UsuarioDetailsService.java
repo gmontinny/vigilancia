@@ -23,4 +23,10 @@ public class UsuarioDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
         return new AppUserDetails(usuario);
     }
+
+    public UserDetails loadUserByCpf(String cpf) throws UsernameNotFoundException {
+        Usuario usuario = usuarioRepository.findByCpfWithPermissoes(cpf)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado para CPF: " + cpf));
+        return new AppUserDetails(usuario);
+    }
 }
