@@ -16,6 +16,8 @@ public class UsuarioDTO {
     private String imagem;
     private Integer tipo;
     private Integer status;
+    // Expor apenas se o 2FA está habilitado; não inclui o segredo
+    private Boolean totpEnabled;
     private List<EnderecoDTO> enderecos;
     private List<FiscalDTO> fiscais;
     private List<PermissaoDTO> permissoes;

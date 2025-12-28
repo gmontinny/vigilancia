@@ -14,10 +14,13 @@ public interface UsuarioMapper {
     @Mapping(source = "enderecos", target = "enderecos")
     @Mapping(source = "fiscais", target = "fiscais")
     @Mapping(source = "permissoes", target = "permissoes")
+    @Mapping(source = "totpEnabled", target = "totpEnabled")
     UsuarioDTO toDto(Usuario usuario);
 
     @Mapping(target = "enderecos", ignore = true)
     @Mapping(target = "fiscais", ignore = true)
     @Mapping(target = "permissoes", ignore = true)
+    @Mapping(target = "totpSecret", ignore = true)
+    @Mapping(target = "totpEnabled", ignore = true)
     Usuario toEntity(UsuarioDTO usuarioDTO);
 }

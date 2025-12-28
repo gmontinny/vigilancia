@@ -1,275 +1,14 @@
-# Projeto Vigilância Sanitária — Backend
+## Sumário de Endpoints
 
-## Visão Geral
+- Documentação interativa (Swagger UI): http://localhost:8081/swagger-ui/index.html
+- Contrato OpenAPI (JSON): http://localhost:8081/v3/api-docs
+- Lista completa de endpoints (CRUD e leitura): ver docs/README_ENDPOINTS.md
 
-Backend moderno em Spring Boot para substituir o sistema legado, com foco em arquitetura limpa, performance e manutenibilidade. O projeto evolui a partir das regras de negócio existentes, preservando compatibilidade onde fizer sentido e adotando boas práticas atuais.
-
-## Sumário
-- Requisitos
-- Configuração rápida (Docker + PostgreSQL)
-- Variáveis de ambiente
-- Executando a aplicação (dev)
-- Estrutura do projeto
-- Banco de dados e migrações (Flyway)
-- Endpoints disponíveis
-- Build, testes e qualidade
-- Dicas de desenvolvimento
-- Segurança e boas práticas
-- Autenticação e autorização (JWT)
-- Troubleshooting
-
-## Requisitos
-- Java 21 (JDK)
-- Gradle (wrapper incluído: `./gradlew` / `gradlew.bat`)
-- Docker e Docker Compose (opcional para banco local)
-
-## Configuração rápida (Docker + PostgreSQL)
-O projeto inclui um `docker-compose.yml` para subir um PostgreSQL e o PgAdmin.
-
-1. Crie um arquivo `.env` na raiz do projeto (mesmo nível do `docker-compose.yml`). Veja a seção "Variáveis de ambiente" abaixo.
-2. Suba os serviços:
-   - Windows PowerShell:
-     ```powershell
-     docker compose up -d
-     ```
-3. Verifique a saúde do serviço `db` (o compose já tem healthcheck). Quando saudável, o PgAdmin estará em `http://localhost:8080`.
-
-PgAdmin (padrão do `.env`):
-- URL: `http://localhost:8080`
-- Usuário: valor de `PGADMIN_DEFAULT_EMAIL`
-- Senha: valor de `PGADMIN_DEFAULT_PASSWORD`
-
-Dica: no PgAdmin, crie uma conexão para o servidor `db` com host `db`, porta `5432`, usuário e banco conforme seu `.env`.
-
-## Variáveis de ambiente
-Crie um arquivo `.env` (não versionado idealmente) com o seguinte conteúdo (exemplo):
-
-```dotenv
-POSTGRES_USER=appuser
-POSTGRES_PASSWORD=appsecret
-POSTGRES_DB=vigilancia
-DB_SCHEMA=app
-SERVER_PORT=8081
-PGADMIN_DEFAULT_EMAIL=admin@example.com
-PGADMIN_DEFAULT_PASSWORD=adminsecret
-```
-
-Importante:
-- Não use credenciais reais em commits. Prefira um `.env.example` (ver abaixo) para documentar os campos.
-- Caso já exista um `.env` com credenciais, troque-as localmente e regenere usuários/senhas quando publicar.
-
-Também incluído para referência:
-- `docker-compose.yml`: define os serviços `db` (PostgreSQL 15) e `pgadmin`.
-
-## Executando a aplicação (dev)
-Você pode rodar a aplicação sem o Docker (se já possuir um PostgreSQL disponível) ou usando o banco do compose.
-
-- Com Gradle Wrapper:
-  - Windows:
-    ```powershell
-    .\\gradlew.bat bootRun
-    ```
-  - Linux/macOS:
-    ```bash
-    ./gradlew bootRun
-    ```
-
-- Build do jar:
-  ```bash
-  ./gradlew clean build
-  ```
-  O artefato será gerado em `build/libs/`.
-
-Configuração de acesso ao banco (application.properties/yaml): verifique as propriedades ativas para apontar para o host, porta, banco, usuário e senha correspondentes.
-
-## Estrutura do projeto
-Arquitetura em camadas (pacotes principais em `src/main/java/br/gov/mt/vigilancia`):
-- `domain`: Entidades JPA (tabelas do banco)
-- `repository`: Spring Data JPA para acesso a dados
-- `service`: Regras de negócio
-- `controller`: Endpoints REST
-- `dto`: Objetos de transferência de dados para API
-- `mapper`: MapStruct para mapear Entity ↔ DTO
-
-Arquivos importantes:
-- `src/main/resources/db/migration`: scripts Flyway (ex.: `V1__init.sql`)
-- `docker-compose.yml` e `.env`: infraestrutura local de DB
-- `HELP.md`: links úteis do ecossistema Spring e Gradle
-
-## Banco de dados e migrações (Flyway)
-- As migrações residem em `src/main/resources/db/migration` e são aplicadas automaticamente no startup pela Flyway.
-- Versões principais já incluídas:
-  - V1__init.sql — cria o schema `app` e extensões úteis.
-  - V2__domain_schema.sql — base do domínio: `conselho`, `responsavel_tecnico`, `usuario`, `estabelecimento`, `processo` + FKs e índices.
-  - V3__grupo_subgrupo.sql — tabelas `grupo` e `subgrupo` com validações básicas.
-  - V4__domain_full.sql — amplia o domínio (ex.: `acao`, `endereco`, `tipoempresa`, `ordemservico`, `reclamacao`, `bpa`, `tabela`, `fiscal`, etc.).
-  - V5__update_domain.sql — adiciona entidades como `produtos`, `servicos`, `saude`, `forum`, `prodi`, `galeria`, `roteiro`, `motivo`, `baixa`, `sintomas`.
-  - V6__categorias_veiculos.sql — cria `categoria` e `veiculo`, com FKs para `estabelecimento` e `categoria`.
-  - V7__licencias_mensagens_timelines_unidades_apreensoes.sql — cria `licencia`, `mensagem`, `timeline`, `unidademedida` e `apreensao` com FKs e índices.
-  - V8__ajustes_nomes_colunas_servicos.sql — padroniza colunas de `servicos` para snake_case.
-  - V9__seed_usuario_permissao_tabela.sql — semeia dados para testes de autenticação/autorização (usuário admin `admin@local`).
-  - V10__reseed_admin_password.sql — garante senha BCrypt válida para `admin@local`.
-  - V11__cupomauto_documentos_geraauto_resposta_embalagem_fiscaladm_geraprodi.sql — cria tabelas do legado com sequências.
-  - V12__rename_columns_snake_case_legacy.sql — renomeia colunas para snake_case, alinhando com Hibernate.
-  - V13__administrativo_agrupamento_analiseprocesso_areainspecao_arquitetonico_licenciamento.sql — cria tabelas administrativas com FKs e índices.
-  - V14__adjust_sequences_allocation_size.sql — ajusta `INCREMENT BY` das sequências para 50.
-  - V15__create_missing_sequences_auto.sql — cria sequências esperadas pelo Hibernate.
-  - V16__arquivodocumento_assuntosolicitacao_atividadefiscal_atividades_atividadevigilancia.sql — cria tabelas de documentos e atividades.
-  - V17__autoinfracao_tramitacao_autonotificacao_balancomedicamento_bloqueioitenssolicitacao_itenssolicitacao_solicitacao_tipoinspecao_carteirinha.sql — cria tabelas de infrações, tramitações e solicitações.
-  - V18__categoriaanalise_categoriaproduto_categoriaroteiro_categoriaservico_despachocontrarazao_itensroteiro_servicosaude_legislacao.sql — cria tabelas de categorias e serviços de saúde.
-  - V19__despachos_docnecessario_upload_documentoerrado.sql — cria tabelas de despachos e documentos.
-  - V20__embalagem_empresainfracoes_entregador_exiberoteiro_farmaceutico_montarroteiro.sql — cria tabelas de embalagens e roteiros.
-  - V21__fix_embalagem_sequence.sql — corrige sequência da tabela embalagem.
-- V22__geraatividade_geracategoriaservico_geracodigocertificacao_geradocumento_geragaleria.sql — cria as tabelas do legado para as entidades `Geraatividade`, `Geracategoriaservico`, `Geracodigocertificacao`, `Geradocumento` e `Geragaleria` com sequences (INCREMENT BY 50) e índices de `idusuario` onde aplicável.
-- Alinhamento de schema:
-  - Hibernate valida no schema `app` via `spring.jpa.properties.hibernate.default_schema=${DB_SCHEMA:app}`.
-  - Flyway migra no schema `app` via `spring.flyway.default-schema`/`schemas`.
-  - Opcional: acrescente `?currentSchema=app` na URL JDBC para ambientes que não respeitam o `search_path`.
-- Para criar uma nova versão, adicione um arquivo `V{N}__sua_descricao.sql` seguindo a sequência numérica e rode a aplicação.
-
-#### Notas sobre a V22
-- Arquivo: `src/main/resources/db/migration/V22__geraatividade_geracategoriaservico_geracodigocertificacao_geradocumento_geragaleria.sql`
-- Padrões:
-  - Schema: `app` (alinhado ao `application.yml`).
-  - Sequences com `INCREMENT BY 50` para cada tabela.
-  - Tabelas com PK usando `DEFAULT nextval('schema.sequence')`.
-  - Índices para colunas `idusuario` onde aplicável.
-  - Bloco `DO $$` para ajustar (`setval`) as sequences de acordo com dados existentes (idempotente).
-- Tabelas criadas: `geraatividade`, `geracategoriaservico`, `geracodigocertificacao`, `geradocumento`, `geragaleria`.
-- Observação: Não foram incluídas FKs, pois as entidades do legado não declaram relações explícitas. Poderá ser evoluído no futuro.
-
-#### Como aplicar a V22
-- Ao iniciar a aplicação com banco configurado, a Flyway aplicará automaticamente.
-- Alternativas:
-  - Via Gradle: `./gradlew flywayMigrate`
-  - Subindo via Docker Compose e rodando a aplicação: `docker compose up -d` (db) e depois `./gradlew bootRun` (app)
-- Requisitos: variáveis `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` e opcionalmente `DB_SCHEMA` (padrão `app`).
-
-## Execução de migrações com Gradle (Flyway plugin)
-O plugin Flyway está configurado no `build.gradle` com as dependências PostgreSQL no buildscript.
-
-### Configuração atual
-- Plugin: `org.flywaydb.flyway` 10.20.0
-- Dependências no buildscript: `postgresql:42.7.4` e `flyway-database-postgresql:10.20.0`
-- Schema padrão: `app`
-- Credenciais padrão: `appuser/appsecret` (conforme `.env`)
-
-### Comandos úteis
-- Ver informações das migrações:
-```bash
-./gradlew flywayInfo
-```
-- Executar migrações:
-```bash
-./gradlew flywayMigrate
-```
-- Usar credenciais diferentes:
-```bash
-./gradlew flywayInfo -Pflyway.user=seuusuario -Pflyway.password=suasenha
-```
-- Limpar schema (cuidado):
-```bash
-./gradlew flywayClean
-```
-
-### Troubleshooting
-- Certifique-se de que o Docker Compose está rodando: `docker compose up -d`
-- Verifique se o banco existe e as credenciais estão corretas
-- Para debug: `./gradlew flywayInfo --info --stacktrace`
-
-## Endpoints disponíveis
-Atualmente mapeados (podem evoluir):
-- `POST /auth/login` — autentica e retorna um token JWT
-- `POST /auth/refresh` — emite um novo token JWT a partir de um token (possivelmente expirado)
-- `GET /auth/me` — informações do usuário autenticado (requer Bearer token)
-- `GET /health` — status da aplicação
-- `GET /usuarios` — lista usuários
-- `GET /processos` — lista processos
-- `GET /estabelecimentos` — lista estabelecimentos
-- `GET /conselhos` — lista conselhos profissionais
-- `GET /responsaveis-tecnicos` — lista responsáveis técnicos
-- `GET /tipos-empresa` — lista tipos de empresa
-- `GET /enderecos` — lista endereços
-- `GET /acoes` — lista ações
-- `GET /ordens-servico` — lista ordens de serviço
-- `GET /reclamacoes` — lista reclamações
-- `GET /produtocategorias` — lista categorias de produto
-- `GET /produtocategorias/{id}` — busca categoria por ID
-- `POST /produtocategorias` — cria categoria
-- `PUT /produtocategorias/{id}` — atualiza categoria
-- `DELETE /produtocategorias/{id}` — exclui categoria
-
-### Endpoints CRUD Completos (130 Controllers)
-
-Todos os controllers possuem operações CRUD completas com documentação OpenAPI:
-
-**Padrão de Endpoints:**
-- `GET /{resource}` — lista todos os recursos
-- `GET /{resource}/{id}` — busca recurso por ID
-- `POST /{resource}` — cria novo recurso
-- `PUT /{resource}/{id}` — atualiza recurso existente
-- `DELETE /{resource}/{id}` — exclui recurso
-
-**Controllers com CRUD Completo:**
-- `/acoes` — Ações de vigilância sanitária
-- `/administrativos` — Dados administrativos
-- `/agrupamentos` — Agrupamentos
-- `/alvaras` — Alvarás sanitários
-- `/analiseprocessos` — Análises de processo
-- `/apreensoes` — Apreensões
-- `/areainspecao` — Áreas de inspeção
-- `/arquitetonicos` — Dados arquitetônicos
-- `/arquivodocumentos` — Arquivos de documento
-- `/assuntosolicitacoes` — Assuntos de solicitação
-- `/atividadefiscais` — Atividades fiscais
-- `/atividadevigilancias` — Atividades de vigilância
-- `/autoinfracoes` — Autoinfrações
-- `/autonotificacoes` — Autonotificações
-- `/baixas` — Baixas
-- `/bpas` — BPAs (Boletim de Produção Ambulatorial)
-- `/categorias` — Categorias
-- `/conselhos` — Conselhos profissionais
-- `/cupomauto` — Cupons de auto
-- `/documentos` — Documentos
-- `/embalagens` — Embalagens
-- `/enderecos` — Endereços
-- `/estabelecimentos` — Estabelecimentos
-- `/fabris` — Dados fabris
-- `/fiscais` — Fiscais
-- `/fiscaladms` — Fiscais administrativos
-- `/galerias` — Galerias
-- `/geraauto` — Geradores de auto
-- `/geraprodis` — Geradores de PRODI
-- `/grupos` — Grupos
-- `/licencias` — Licenças
-- `/licenciamentos` — Licenciamentos
-- `/mensagens` — Mensagens
-- `/motivos` — Motivos
-- `/permissoes` — Permissões
-- `/processos` — Processos administrativos
-- `/prodis` — PRODIs
-- `/produtos` — Produtos
-- `/produtocategorias` — Categorias de produto
-- `/reclamacoes` — Reclamações
-- `/responsaveis-tecnicos` — Responsáveis técnicos
-- `/resposta` — Respostas
-- `/roteiros` — Roteiros de inspeção
-- `/saudes` — Dados de saúde
-- `/servicos` — Serviços
-- `/subgrupos` — Subgrupos
-- `/tabelas` — Tabelas
-- `/tipos-empresa` — Tipos de empresa
-- `/tramitacoes` — Tramitações
-- `/unidades-medida` — Unidades de medida
-- `/usuarios` — Usuários
-- `/veiculos` — Veículos
-
-**Controllers Somente Leitura:**
-- `/logs` — Lista de logs
-- `/foruns` — Lista de fóruns
-- `/sintomas` — Lista de sintomas
-- `/timelines` — Lista de timelines
-- `/ordens-servico` — Lista de ordens de serviço
+Principais grupos:
+- Autenticação: `/auth/login`, `/auth/refresh`, `/auth/me`
+- Usuários: `/usuarios` (CRUD)
+- 2FA TOTP: `/usuarios/{id}/totp/register`, `/usuarios/{id}/totp/verify`, `/usuarios/{id}/totp/disable`
+- Demais domínios de negócio: ver docs/README_ENDPOINTS.md ou Swagger UI
 
 ## Build, testes e qualidade
 - Compilar e rodar testes:
@@ -310,6 +49,50 @@ security:
 - **OpenAPI**: use `@Tag`, `@Operation`, `@ApiResponse` para documentar novos endpoints
 - **Validação**: sempre use `@Valid` em endpoints POST/PUT
 - **Perfis**: se existirem perfis (ex.: `dev`, `prod`), ajuste as propriedades conforme o ambiente
+
+## CORS — Suporte a Frontend Angular (porta 4200) e domínios distintos
+
+Esta API está preparada para CORS, permitindo que um frontend (ex.: Angular 18) rode em origem distinta como `http://localhost:4200` em desenvolvimento, ou um DNS diferente em produção.
+
+Como funciona:
+- O CORS é habilitado via `http.cors()` no `SecurityConfig` e um bean `CorsConfigurationSource` parametrizável.
+- Por padrão, a origem `http://localhost:4200` está liberada para facilitar o desenvolvimento.
+- Pré‑flight `OPTIONS` está liberado globalmente.
+
+Parâmetros (em `application.yml`, com sobrescrita via variáveis de ambiente):
+```yaml
+security:
+  cors:
+    allowed-origins: ${SECURITY_CORS_ALLOWED_ORIGINS:http://localhost:4200}
+    allowed-methods: ${SECURITY_CORS_ALLOWED_METHODS:GET,POST,PUT,PATCH,DELETE,OPTIONS}
+    allowed-headers: ${SECURITY_CORS_ALLOWED_HEADERS:Authorization,Content-Type,Accept}
+    allow-credentials: ${SECURITY_CORS_ALLOW_CREDENTIALS:true}
+```
+
+Exemplos de configuração:
+- Desenvolvimento (Angular local):
+  - Windows PowerShell:
+    ```powershell
+    $env:SECURITY_CORS_ALLOWED_ORIGINS = "http://localhost:4200"
+    ```
+  - Linux/macOS Bash:
+    ```bash
+    export SECURITY_CORS_ALLOWED_ORIGINS="http://localhost:4200"
+    ```
+- Produção (DNS do app):
+  - Permitir múltiplas origens separadas por vírgula:
+    ```bash
+    export SECURITY_CORS_ALLOWED_ORIGINS="https://app.seudominio.gov.br,https://admin.seudominio.gov.br"
+    ```
+
+Quando usar Proxy vs CORS no Angular:
+- Proxy (mesma origem) — recomendado para desenvolvimento: configure `proxy.conf.json` no Angular e chame `/api/...`. Vantagens: evita CORS e cookies/credenciais funcionam sem ajustes.
+- CORS (origens distintas) — comum em produção quando front e back estão em domínios diferentes: aponte `environment.apiBaseUrl` para o backend e garanta que a origem do frontend esteja listada em `SECURITY_CORS_ALLOWED_ORIGENS`.
+
+Observações:
+- Se usar JWT no header `Authorization`, mantenha `allowed-headers` com `Authorization` e `Content-Type`.
+- Para cookies/sessão, deixe `allow-credentials: true` e configure o front para enviar credenciais.
+- O preflight (`OPTIONS`) é automaticamente tratado pelo Spring Security e liberado neste projeto.
 
 ## Segurança e boas práticas
 - Não commitar `.env` com segredos reais. Inclua um `/.gitignore` apropriado e mantenha apenas um `.env.example` sem segredos.
@@ -394,7 +177,7 @@ A aplicação foi migrada de HTTP Basic para JWT, mantendo o domínio existente 
 
 - Protegendo endpoints por authority
   - No `SecurityConfig`, restrinja por authority conforme necessário (exemplo):
-    ```java
+    ```
     http.authorizeHttpRequests(auth -> auth
         .requestMatchers("/some/admin/**").hasAuthority("PERM_USUARIO:UPDATE")
         .anyRequest().authenticated()
@@ -580,3 +363,369 @@ Contexto: Em ambientes com base de dados legada, os nomes reais das tabelas/colu
 - MapStruct: aponte para os nomes efetivos das propriedades nas entidades (não confundir com nomes de coluna no banco).
 
 Com esse fluxo, evitamos scripts desnecessários, aceleramos a entrega e mantemos compatibilidade com o banco legado sem "bagunçar" o schema.
+
+
+### Exemplo completo — 2FA TOTP (registro, verificação e desabilitação)
+
+Pré‑requisitos:
+- Aplicação em execução (por padrão em http://localhost:8081)
+- Um usuário existente com `id` conhecido (ex.: `1`)
+- Token JWT válido (use as rotas `/auth/login` e `/auth/me` se necessário)
+
+1) Obtenha um token JWT
+```bash
+curl -s -X POST http://localhost:8081/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@local","senha":"admin"}'
+```
+Copie o valor de `token` da resposta e exporte em uma variável (PowerShell):
+```powershell
+$env:TOKEN = "<cole-o-token-aqui>"
+```
+
+2) Iniciar o registro TOTP (gera segredo, otpauth e QR Code em Data URI)
+```bash
+curl -s -X POST http://localhost:8081/usuarios/1/totp/register \
+  -H "Authorization: Bearer $TOKEN"
+```
+Resposta (exemplo):
+```json
+{
+  "otpauthUrl": "otpauth://totp/vigilancia:admin%40local?secret=ABCDEF123...&issuer=vigilancia&algorithm=SHA1&digits=6&period=30",
+  "qrCodeDataUri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEU...",
+  "issuer": "vigilancia",
+  "accountLabel": "admin@local"
+}
+```
+
+Exibir o QR Code no frontend (HTML simples):
+```html
+<img alt="QR TOTP" src="data:image/png;base64, ..." />
+```
+Ou use diretamente `qrCodeDataUri` do JSON: `<img src="{qrCodeDataUri}" />`.
+Alternativa sem QR: configure no app autenticador usando a `otpauthUrl` (ou informe o `secret` manualmente, se suportado).
+
+3) Verificar e habilitar o TOTP (informe o código de 6 dígitos do app)
+```bash
+curl -i -X POST http://localhost:8081/usuarios/1/totp/verify \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"code":"123456"}'
+```
+Respostas esperadas:
+- `200 OK`: código válido, 2FA habilitado para o usuário
+- `400 Bad Request`: código inválido ou segredo não registrado
+- `404 Not Found`: usuário não existe
+
+4) Conferir status do usuário (campo `totpEnabled`)
+```bash
+curl -s http://localhost:8081/usuarios/1 \
+  -H "Authorization: Bearer $TOKEN"
+```
+Verifique `"totpEnabled": true` no JSON retornado.
+
+5) Desabilitar o TOTP (exige validar com o código atual)
+```bash
+curl -i -X POST http://localhost:8081/usuarios/1/totp/disable \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"code":"123456"}'
+```
+Respostas:
+- `200 OK`: 2FA desabilitado (o segredo é removido)
+- `400 Bad Request`: código inválido
+- `404 Not Found`: usuário não existe
+
+Dicas e observações importantes:
+- Sincronize o relógio do servidor e do dispositivo (o TOTP depende de tempo). Há tolerância de ±1 passo (≈30s).
+- O segredo TOTP não é exposto pela API. Apenas `totpEnabled` é visível no `UsuarioDTO`.
+- Proteja esses endpoints com JWT. Evite logar códigos TOTP em produção.
+- Recomendado implementar rate limiting e auditoria para tentativas de verificação.
+
+---
+
+## Exemplo Frontend Angular 18 — Integração com TOTP (2FA)
+
+Este guia documenta como integrar um frontend Angular 18 com os endpoints TOTP deste backend. Inclui as variações solicitadas:
+- Opção A: consumo em mesma origem via proxy do Angular (dev)
+- Opção B: consumo via domínio distinto (CORS)
+- Uso de HttpClient puro (serviço Angular)
+- Interceptor de JWT (Bearer) e guarda de rota simples
+
+Pré‑requisitos assumidos:
+- O login no frontend já está implementado e fornece um token JWT (armazenado em `localStorage` ou `sessionStorage`).
+- O `userId` do usuário autenticado é conhecido. Nos exemplos, usaremos `userId = 1` apenas como placeholder.
+- Backend rodando em `http://localhost:8081`.
+
+### Sumário
+- Opção A — Proxy (mesma origem) no Angular
+- Opção B — Domínio distinto (CORS)
+- Serviço Angular: `TotpApiService`
+- Interceptor JWT (Bearer)
+- Guarda de rota (`AuthGuard`) simples
+- Componentes: Registrar (QR), Verificar, Desabilitar
+- Observações de segurança e UX
+
+### Opção A — Mesma origem via proxy (Angular dev‑server)
+
+1) Crie `proxy.conf.json` no projeto Angular:
+```json
+{
+  "/api": {
+    "target": "http://localhost:8081",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": { "^/api": "" }
+  }
+}
+```
+
+2) Ajuste o script de start no `package.json` do frontend:
+```json
+{
+  "scripts": {
+    "start": "ng serve --proxy-config proxy.conf.json"
+  }
+}
+```
+
+3) Nas chamadas HTTP, use o prefixo `/api` (ex.: `/api/usuarios/1/totp/register`). O proxy encaminha para `http://localhost:8081/usuarios/1/totp/register`.
+
+### Opção B — Domínio distinto (CORS)
+
+- Use a URL completa do backend nas chamadas Angular (ex.: `http://localhost:8081`).
+- Garanta CORS permitido no backend para a origem do frontend (ex.: `http://localhost:4200`). A aplicação já possui CORS default; ajuste se necessário na configuração de segurança.
+
+`environment.ts` (dev) no frontend:
+```ts
+export const environment = {
+  production: false,
+  apiBaseUrl: 'http://localhost:8081'
+};
+```
+
+### Serviço Angular — TotpApiService (HttpClient)
+
+`totp-api.service.ts`
+```ts
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export interface TotpRegisterResponse {
+  otpauthUrl: string;
+  qrCodeDataUri: string;
+  issuer: string;
+  accountLabel: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class TotpApiService {
+  private readonly http = inject(HttpClient);
+  // Use '/api' se estiver com proxy (Opção A), ou environment.apiBaseUrl (Opção B)
+  private readonly base = '/api'; // ou: environment.apiBaseUrl
+
+  register(userId: number): Observable<TotpRegisterResponse> {
+    return this.http.post<TotpRegisterResponse>(`${this.base}/usuarios/${userId}/totp/register`, {});
+  }
+
+  verify(userId: number, code: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/usuarios/${userId}/totp/verify`, { code });
+  }
+
+  disable(userId: number, code: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/usuarios/${userId}/totp/disable`, { code });
+  }
+}
+```
+
+### Interceptor JWT (Bearer)
+
+`jwt.interceptor.ts`
+```ts
+import { Injectable } from '@angular/core';
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class JwtInterceptor implements HttpInterceptor {
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const token = localStorage.getItem('token'); // ou sessionStorage
+    if (token) {
+      req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+    }
+    return next.handle(req);
+  }
+}
+```
+
+Registro do interceptor (providers no bootstrap — Angular 16+):
+```ts
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { AppComponent } from './app/app.component';
+import { JwtInterceptor } from './app/core/jwt.interceptor';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideHttpClient(withInterceptors([ (req, next) => new JwtInterceptor().intercept(req, next) ]))
+  ]
+});
+```
+
+Se utilizar `NgModule`, registre com `HTTP_INTERCEPTORS` no `providers`.
+
+### Guarda de rota (AuthGuard) simples
+
+`auth.guard.ts`
+```ts
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+
+export const authGuard: CanActivateFn = (route, state) => {
+  const router = inject(Router);
+  const token = localStorage.getItem('token');
+  if (!token) {
+    router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+    return false;
+  }
+  return true;
+};
+```
+
+Uso nas rotas:
+```ts
+import { Routes } from '@angular/router';
+import { TotpRegisterComponent } from './totp/totp-register.component';
+import { TotpVerifyComponent } from './totp/totp-verify.component';
+import { TotpDisableComponent } from './totp/totp-disable.component';
+import { authGuard } from './core/auth.guard';
+
+export const routes: Routes = [
+  { path: 'totp/register', component: TotpRegisterComponent, canActivate: [authGuard] },
+  { path: 'totp/verify', component: TotpVerifyComponent, canActivate: [authGuard] },
+  { path: 'totp/disable', component: TotpDisableComponent, canActivate: [authGuard] }
+];
+```
+
+### Componentes de UI
+
+1) Registrar TOTP e exibir QR Code (Data URI)
+
+`totp-register.component.ts`
+```ts
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TotpApiService, TotpRegisterResponse } from '../core/totp-api.service';
+
+@Component({
+  selector: 'app-totp-register',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <button (click)="onRegister()">Gerar QR Code</button>
+    <div *ngIf="qrDataUri() as data">
+      <p>Escaneie no app autenticador:</p>
+      <img [src]="data" alt="QR Code" />
+    </div>
+  `
+})
+export class TotpRegisterComponent {
+  private readonly api = inject(TotpApiService);
+  qrDataUri = signal<string | null>(null);
+  private userId = 1; // obter da sessão/usuário autenticado
+
+  onRegister() {
+    this.api.register(this.userId).subscribe((resp: TotpRegisterResponse) => {
+      this.qrDataUri.set(resp.qrCodeDataUri);
+    });
+  }
+}
+```
+
+2) Verificar e habilitar TOTP
+
+`totp-verify.component.ts`
+```ts
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { TotpApiService } from '../core/totp-api.service';
+
+@Component({
+  selector: 'app-totp-verify',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    <form (ngSubmit)="onSubmit()">
+      <label>Código TOTP</label>
+      <input name="code" [(ngModel)]="code" maxlength="6" required />
+      <button type="submit">Verificar</button>
+    </form>
+    <p *ngIf="message">{{ message }}</p>
+  `
+})
+export class TotpVerifyComponent {
+  private readonly api = inject(TotpApiService);
+  code = '';
+  message = '';
+  private userId = 1;
+
+  onSubmit() {
+    this.api.verify(this.userId, this.code).subscribe({
+      next: () => this.message = '2FA habilitado com sucesso!',
+      error: () => this.message = 'Código inválido ou expirado.'
+    });
+  }
+}
+```
+
+3) Desabilitar TOTP
+
+`totp-disable.component.ts`
+```ts
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { TotpApiService } from '../core/totp-api.service';
+
+@Component({
+  selector: 'app-totp-disable',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    <form (ngSubmit)="onSubmit()">
+      <label>Confirme com o código TOTP atual</label>
+      <input name="code" [(ngModel)]="code" maxlength="6" required />
+      <button type="submit">Desabilitar 2FA</button>
+    </form>
+    <p *ngIf="message">{{ message }}</p>
+  `
+})
+export class TotpDisableComponent {
+  private readonly api = inject(TotpApiService);
+  code = '';
+  message = '';
+  private userId = 1;
+
+  onSubmit() {
+    this.api.disable(this.userId, this.code).subscribe({
+      next: () => this.message = '2FA desabilitado.',
+      error: () => this.message = 'Código inválido.'
+    });
+  }
+}
+```
+
+### Observações de segurança e UX
+- Não logue códigos TOTP em produção.
+- Trate mensagens de erro (400/404) de forma clara e segura no frontend.
+- Considere rate limiting no backend e retry/backoff no frontend.
+- Garanta sincronização de hora entre cliente e servidor.
+- Para produção, avalie estratégias seguras de armazenamento do token e proteção adicional (CSRF quando aplicável).
+
+Com isso, o frontend Angular 18 consegue consumir os endpoints:
+- `POST /usuarios/{id}/totp/register`
+- `POST /usuarios/{id}/totp/verify`
+- `POST /usuarios/{id}/totp/disable`

@@ -81,4 +81,11 @@ public class Usuario {
 
     @OneToMany(mappedBy = "usuario")
     private List<Permissao> permissoes;
+
+    // 2FA (TOTP)
+    // Segredo TOTP do usuário (não deve ser exposto via API)
+    private String totpSecret;
+
+    // Indica se o TOTP está habilitado para o usuário
+    private Boolean totpEnabled;
 }
