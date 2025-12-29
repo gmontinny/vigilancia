@@ -4,8 +4,17 @@
 - Contrato OpenAPI (JSON): http://localhost:8081/v3/api-docs
 - Lista completa de endpoints (CRUD e leitura): [docs/README_ENDPOINTS.md](docs/README_ENDPOINTS.md)
 
+### Documentação detalhada (docs)
+- Recuperação de senha: [docs/PASSWORD_RESET.md](docs/PASSWORD_RESET.md)
+- Mailhog (SMTP de desenvolvimento): [docs/MAILHOG.md](docs/MAILHOG.md)
+- Autenticação JWT: [docs/JWT_AUTH.md](docs/JWT_AUTH.md)
+- CORS (Angular/Origens distintas): [docs/CORS.md](docs/CORS.md)
+- 2FA TOTP: [docs/TOTP_2FA.md](docs/TOTP_2FA.md)
+- Ambiente de desenvolvimento (Docker Compose, perfis): [docs/AMBIENTE_DEV.md](docs/AMBIENTE_DEV.md)
+
 Principais grupos:
 - Autenticação: `/auth/login`, `/auth/refresh`, `/auth/me`
+- Recuperação de Senha: `POST /auth/password/forgot`, `POST /auth/password/reset`
 - Usuários: `/usuarios` (CRUD)
 - 2FA TOTP: `/usuarios/{id}/totp/register`, `/usuarios/{id}/totp/verify`, `/usuarios/{id}/totp/disable`
 - Demais domínios de negócio: ver [docs/README_ENDPOINTS.md](docs/README_ENDPOINTS.md) ou Swagger UI
@@ -49,6 +58,126 @@ security:
 - **OpenAPI**: use `@Tag`, `@Operation`, `@ApiResponse` para documentar novos endpoints
 - **Validação**: sempre use `@Valid` em endpoints POST/PUT
 - **Perfis**: se existirem perfis (ex.: `dev`, `prod`), ajuste as propriedades conforme o ambiente
+
+## Recuperação de Senha — Fluxo completo (Frontend Angular 18)
+
+Endpoints implementados:
+- `POST /auth/password/forgot` — body: `{ "email": "usuario@dominio" }`. Sempre retorna `200 OK`. Se o email existir, envia um link com `token` para a tela do front.
+- `POST /auth/password/reset` — body: `{ "token": "<token>", "novaSenha": "<senha>" }`. Retorna `200 OK` ao sucesso ou `400 Bad Request` se token inválido/expirado.
+
+Configuração necessária:
+- Defina a URL da tela do Angular para nova senha (a API acrescenta `?token=...` automaticamente):
+  ```dotenv
+  APP_FRONTEND_RESET_URL=http://localhost:4200/new-password
+  ```
+- Configure o SMTP (em dev, use Mailhog/SMTP local):
+  ```dotenv
+  MAIL_HOST=localhost
+  MAIL_PORT=1025
+  MAIL_FROM=no-reply@local
+  # credenciais/segurança conforme seu servidor:
+  MAIL_USERNAME=
+  MAIL_PASSWORD=
+  MAIL_SMTP_AUTH=false
+  MAIL_SMTP_STARTTLS=false
+  ```
+
+Exemplo de uso (curl):
+```bash
+curl -X POST http://localhost:8081/auth/password/forgot \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@local"}' -i
+
+# Depois do e-mail recebido, pegue o token da URL e envie:
+curl -X POST http://localhost:8081/auth/password/reset \
+  -H "Content-Type: application/json" \
+  -d '{"token":"<TOKEN_RECEBIDO>","novaSenha":"novaSenha123"}' -i
+```
+
+Boas práticas adotadas:
+- Token randômico seguro (Base64 URL-safe) válido por 2 horas.
+- Evita "user enumeration": `/forgot` sempre responde 200.
+- Invalida tokens antigos do usuário ao gerar um novo.
+- Marca token como usado após redefinição.
+
+## Mailhog — Envio de e‑mail em desenvolvimento (SMTP local)
+
+O projeto está preparado para usar o Mailhog em ambiente de desenvolvimento. O Mailhog captura todos os e‑mails enviados e os exibe numa interface web, evitando envio real.
+
+Pré‑requisitos:
+- Docker instalado.
+- Backend iniciado em perfil `dev` (ou com as variáveis de e‑mail padrão).
+
+1) Subir o Mailhog com Docker Compose (recomendado)
+```bash
+docker compose up -d mailhog
+```
+Alternativa (container avulso):
+```bash
+docker run -d --name mailhog -p 1025:1025 -p 8025:8025 mailhog/mailhog:latest
+```
+
+2) Acessar a interface do Mailhog
+- UI Web: http://localhost:8025
+- SMTP: `localhost:1025`
+
+3) Configuração do backend (já pronta por padrão para dev)
+As variáveis abaixo já estão definidas com defaults para o Mailhog em `application.yml` (e também no `.env`):
+```dotenv
+MAIL_HOST=localhost
+MAIL_PORT=1025
+MAIL_FROM=no-reply@local
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_SMTP_AUTH=false
+MAIL_SMTP_STARTTLS=false
+```
+
+4) Iniciar o backend em modo dev
+```powershell
+$env:SPRING_PROFILES_ACTIVE = "dev"; ./gradlew clean bootRun
+```
+
+5) Enviar um e‑mail de teste (fluxo de redefinição de senha)
+```bash
+curl -i -X POST http://localhost:8081/auth/password/forgot \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@local"}'
+```
+Abra o Mailhog (http://localhost:8025), localize o e‑mail e copie o valor do parâmetro `token` da URL. Em seguida, finalize a redefinição:
+```bash
+curl -i -X POST http://localhost:8081/auth/password/reset \
+  -H "Content-Type: application/json" \
+  -d '{"token":"<TOKEN>","novaSenha":"novaSenha123"}'
+```
+
+6) Verificação automática (PowerShell) — opcional
+```powershell
+$ErrorActionPreference = 'Stop'
+# Health
+$health = Invoke-RestMethod -Uri "http://localhost:8081/actuator/health" -TimeoutSec 5
+if ($health.status -ne 'UP') { throw "Backend não está UP" }
+# Forgot
+Invoke-RestMethod -Method Post -Uri http://localhost:8081/auth/password/forgot -ContentType 'application/json' -Body '{"email":"admin@local"}' | Out-Null
+Start-Sleep -Seconds 1
+# Extrair token do Mailhog
+$json = Invoke-RestMethod -Uri "http://localhost:8025/api/v2/messages?limit=1" -TimeoutSec 5
+$body = $json.items[0].Content.Body
+$joined = $body -replace "=`r`n", ""
+$decoded = [Regex]::Replace($joined, "=([0-9A-F]{2})", { param($m) [char]([Convert]::ToInt32($m.Groups[1].Value,16)) })
+$match = [Regex]::Match($decoded, "token=([A-Za-z0-9_\-]+)")
+if (-not $match.Success) { throw "Token não encontrado no e-mail do Mailhog" }
+$token = $match.Groups[1].Value
+# Reset
+$payload = @{ token = $token; novaSenha = "novaSenha123" } | ConvertTo-Json -Compress
+$resp = Invoke-WebRequest -UseBasicParsing -Method Post -Uri http://localhost:8081/auth/password/reset -ContentType 'application/json' -Body $payload
+"RESET: $($resp.StatusCode) $($resp.StatusDescription)"
+```
+
+Solução de problemas:
+- Se você adicionou a dependência de e‑mail recentemente, faça restart limpo: `./gradlew clean bootRun`. O DevTools não carrega novos JARs adicionados após o start.
+- Conflito de nome do container `mailhog`: remova o antigo com `docker rm -f mailhog` ou use apenas o serviço do Compose.
+- Certifique‑se de que as portas `1025` (SMTP) e `8025` (UI) não estão em uso por outros serviços.
 
 ## CORS — Suporte a Frontend Angular (porta 4200) e domínios distintos
 

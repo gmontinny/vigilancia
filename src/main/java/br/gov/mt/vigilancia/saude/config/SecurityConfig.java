@@ -84,6 +84,8 @@ public class SecurityConfig {
                     "/actuator/info",
                     "/auth/login",
                     "/auth/refresh",
+                    "/auth/password/forgot",
+                    "/auth/password/reset",
                     "/auth/dev/**",
                     // Swagger/OpenAPI (springdoc)
                     "/v3/api-docs",

@@ -34,6 +34,16 @@ services:
     networks:
       - dbnet
 
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # UI Web
+    restart: unless-stopped
+    networks:
+      - dbnet
+
 volumes:
   postgres-data:
 
