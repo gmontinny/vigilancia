@@ -55,6 +55,14 @@ logging:
     org.hibernate.SQL: INFO
     org.hibernate.type.descriptor.sql.BasicBinder: WARN
 
+minio:
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  bucket: ${MINIO_BUCKET:vigilancia}
+  use-ssl: ${MINIO_USE_SSL:false}
+  url-expiration-minutes: ${MINIO_URL_EXP_MINUTES:30}
+
 app:
   frontend:
     reset-password-url: ${APP_FRONTEND_RESET_URL:http://localhost:4200/new-password}

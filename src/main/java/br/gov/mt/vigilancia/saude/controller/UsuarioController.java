@@ -4,13 +4,19 @@ import br.gov.mt.vigilancia.saude.dto.UsuarioDTO;
 import br.gov.mt.vigilancia.saude.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -45,18 +51,29 @@ public class UsuarioController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    @Operation(summary = "Criar usuário", description = "Cria um novo usuário no sistema")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            summary = "Criar usuário",
+            description = "Cria um novo usuário no sistema. Informe todos os atributos necessários. Senha é write-only. Suporta envio multipart: parte JSON 'usuario' e parte arquivo 'imagem' (opcional).")
     @ApiResponse(responseCode = "200", description = "Usuário criado com sucesso")
-    public ResponseEntity<UsuarioDTO> create(@Valid @RequestBody UsuarioDTO usuarioDTO) {
-        return ResponseEntity.ok(usuarioService.save(usuarioDTO));
+    public ResponseEntity<UsuarioDTO> create(
+            @Parameter(description = "Parte JSON com os dados do usuário") @RequestPart("usuario") @Valid UsuarioDTO usuarioDTO,
+            @Parameter(description = "Arquivo de imagem do usuário (opcional)") @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+        return ResponseEntity.ok(usuarioService.saveWithImage(usuarioDTO, imagem));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar usuário", description = "Atualiza um usuário existente")
     @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso")
     @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
-    public ResponseEntity<UsuarioDTO> update(@Parameter(description = "ID do usuário", example = "1") @PathVariable Integer id, @Valid @RequestBody UsuarioDTO usuarioDTO) {
+    @RequestBody(description = "Dados do usuário a serem atualizados (campos ausentes serão mantidos)",
+            required = true,
+            content = @Content(schema = @Schema(implementation = UsuarioDTO.class),
+                    examples = @ExampleObject(name = "Exemplo de atualização",
+                            value = "{\n  \"nome\": \"Maria A. da Silva\",\n  \"celular\": \"+55 65 98888-0000\",\n  \"administrativo\": 0\n}")))
+    public ResponseEntity<UsuarioDTO> update(
+            @Parameter(description = "ID do usuário", example = "1") @PathVariable Integer id,
+            @Valid @RequestBody UsuarioDTO usuarioDTO) {
         return usuarioService.findById(id)
                 .map(existing -> {
                     usuarioDTO.setId(id);

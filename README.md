@@ -19,6 +19,50 @@ Principais grupos:
 - 2FA TOTP: `/usuarios/{id}/totp/register`, `/usuarios/{id}/totp/verify`, `/usuarios/{id}/totp/disable`
 - Demais domínios de negócio: ver [docs/README_ENDPOINTS.md](docs/README_ENDPOINTS.md) ou Swagger UI
 
+## Ambiente de desenvolvimento — MinIO (resumo)
+
+O projeto utiliza MinIO (compatível com S3) para armazenar arquivos, como a imagem do usuário no `POST /usuarios`. O bucket padrão é `vigilancia`.
+
+- Subir apenas o MinIO (modo dev):
+  ```bash
+  docker compose -f docker-compose-minio.yml up -d
+  ```
+- Console Web: http://localhost:9001 (user/pass padrão: `minioadmin`/`minioadmin`).
+- A aplicação garante a criação do bucket configurado ao iniciar (`vigilancia` por padrão).
+
+Variáveis de ambiente (.env) relevantes:
+```dotenv
+MINIO_ENDPOINT=http://localhost:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_BUCKET=vigilancia
+MINIO_USE_SSL=false
+MINIO_URL_EXP_MINUTES=30
+```
+
+Envio de imagem no `POST /usuarios` (multipart/form-data):
+- A requisição deve conter duas partes:
+  - `usuario` (JSON) com os dados do usuário
+  - `imagem` (arquivo) opcional. O backend salva no MinIO e persiste apenas a `objectKey` (ex.: `usuarios/<uuid>.jpg`).
+
+Exemplo de cURL (substitua `<TOKEN>` e o caminho do arquivo):
+```bash
+curl -X POST "http://localhost:8081/usuarios" \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: multipart/form-data" \
+  -F 'usuario={
+        "nome": "Maria da Silva",
+        "cpf": "123.456.789-00",
+        "email": "maria@exemplo.com",
+        "senha": "Secr3ta!",
+        "status": 1,
+        "tipo": 1
+      };type=application/json' \
+  -F "imagem=@./foto-perfil.jpg;type=image/jpeg"
+```
+
+Para mais detalhes (comandos, exemplos e notas de uso), consulte: [docs/AMBIENTE_DEV.md](docs/AMBIENTE_DEV.md)
+
 ## Build, testes e qualidade
 - Compilar e rodar testes:
   ```bash
