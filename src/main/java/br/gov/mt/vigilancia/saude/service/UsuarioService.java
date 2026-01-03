@@ -6,6 +6,7 @@ import br.gov.mt.vigilancia.saude.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final MinioStorageService minioStorageService;
 
+    @Transactional(readOnly = true)
     public List<UsuarioDTO> findAll() {
         return usuarioRepository.findAll()
                 .stream()
@@ -27,11 +29,13 @@ public class UsuarioService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public java.util.Optional<UsuarioDTO> findById(Integer id) {
         return usuarioRepository.findById(id)
                 .map(usuarioMapper::toDto);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public UsuarioDTO save(UsuarioDTO usuarioDTO) {
         var entity = usuarioMapper.toEntity(usuarioDTO);
 
@@ -57,6 +61,7 @@ public class UsuarioService {
         return save(usuarioDTO);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void deleteById(Integer id) {
         usuarioRepository.deleteById(id);
     }
