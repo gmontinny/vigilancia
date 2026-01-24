@@ -84,6 +84,7 @@ public class SecurityConfig {
                     "/actuator/info",
                     "/auth/login",
                     "/auth/refresh",
+                    "/auth/pre-cadastro",
                     "/auth/password/forgot",
                     "/auth/password/reset",
                     "/auth/dev/**",

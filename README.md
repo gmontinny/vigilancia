@@ -13,7 +13,7 @@
 - Ambiente de desenvolvimento (Docker Compose, perfis): [docs/AMBIENTE_DEV.md](docs/AMBIENTE_DEV.md)
 
 Principais grupos:
-- Autenticação: `/auth/login`, `/auth/refresh`, `/auth/me`
+- Autenticação: `/auth/login`, `/auth/refresh`, `/auth/me`, `/auth/pre-cadastro` (público)
 - Recuperação de Senha: `POST /auth/password/forgot`, `POST /auth/password/reset`
 - Usuários: `/usuarios` (CRUD)
 - 2FA TOTP: `/usuarios/{id}/totp/register`, `/usuarios/{id}/totp/verify`, `/usuarios/{id}/totp/disable`
@@ -353,6 +353,34 @@ A aplicação foi migrada de HTTP Basic para JWT, mantendo o domínio existente 
     Resposta: igual ao login (novo `token`, `expiresIn` reiniciado).
   - `GET /auth/me` — requer `Authorization: Bearer <token>`; retorna dados do usuário autenticado e suas authorities.
 
+- **Pré-cadastro de usuário (Público)**
+  - `POST /auth/pre-cadastro` — Permite que novos usuários se cadastrem sem autenticação prévia.
+  - Formato: `multipart/form-data`
+  - Partes da requisição:
+    - `dados` (JSON): objeto `PreCadastroDTO` contendo:
+      - `nome`, `cpf`, `celular`, `email`, `sexo` (1=M, 2=F, 3=O), `senha`, `confirmarSenha`.
+    - `imagem` (arquivo, opcional): foto de perfil.
+  - Regras de negócio:
+    - Validação de igualdade entre `senha` e `confirmarSenha`.
+    - Usuário é criado com `status = 0` (Inativo/Pendente) e `tipo = 2` (Externo).
+    - Imagem é armazenada no MinIO.
+
+  Exemplo de cURL para Pré-cadastro:
+  ```bash
+  curl -X POST "http://localhost:8081/auth/pre-cadastro" \
+    -H "Content-Type: multipart/form-data" \
+    -F 'dados={
+          "nome": "Novo Usuário",
+          "cpf": "000.000.000-00",
+          "celular": "(65) 99999-9999",
+          "email": "novo@exemplo.com",
+          "sexo": 1,
+          "senha": "senha123",
+          "confirmarSenha": "senha123"
+        };type=application/json' \
+    -F "imagem=@./foto.jpg;type=image/jpeg"
+  ```
+
 - Protegendo endpoints por authority
   - No `SecurityConfig`, restrinja por authority conforme necessário (exemplo):
     ```
@@ -407,7 +435,7 @@ A aplicação foi migrada de HTTP Basic para JWT, mantendo o domínio existente 
 ### Progresso de Desenvolvimento
 - ✅ **130 Controllers** - 100% documentados com OpenAPI
 - ✅ **CRUD Completo** - 45+ controllers com operações completas
-- ✅ **Autenticação JWT** - Sistema stateless implementado
+- ✅ **Autenticação JWT** - Sistema stateless implementado (inclui login, refresh e pré-cadastro)
 - ✅ **Migrações Flyway** - 22 versões aplicadas
 - ✅ **Mapeamento JPA** - Entidades alinhadas com banco legado
 - ✅ **Documentação API** - Swagger UI funcional
@@ -447,6 +475,7 @@ A aplicação foi migrada de HTTP Basic para JWT, mantendo o domínio existente 
 - ✅ **Códigos de resposta HTTP** apropriados (200, 404, 204)
 - ✅ **Documentação de parâmetros** com `@Parameter`
 - ✅ **Tags organizadas** por domínio de negócio
+- ✅ **Pré-cadastro público** - Endpoint `/auth/pre-cadastro` para auto-registro de usuários externos
 - ✅ **Services com métodos CRUD** (findById, save, update, delete)
 - ✅ **Mapeadores MapStruct** atualizados
 - ✅ **Tipos de ID consistentes** (Integer/String conforme entidade)

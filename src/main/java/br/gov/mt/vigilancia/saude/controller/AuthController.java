@@ -3,8 +3,8 @@ package br.gov.mt.vigilancia.saude.controller;
 import br.gov.mt.vigilancia.saude.security.AppUserDetails;
 import br.gov.mt.vigilancia.saude.security.JwtTokenService;
 import br.gov.mt.vigilancia.saude.security.UsuarioDetailsService;
-import br.gov.mt.vigilancia.saude.dto.AuthResponse;
-import br.gov.mt.vigilancia.saude.dto.LoginRequest;
+import br.gov.mt.vigilancia.saude.dto.*;
+import br.gov.mt.vigilancia.saude.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import br.gov.mt.vigilancia.saude.exception.ApiError;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,12 +26,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -50,15 +48,32 @@ public class AuthController {
     private final JwtTokenService jwtTokenService;
     private final UsuarioDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final UsuarioService usuarioService;
 
     public AuthController(AuthenticationManager authenticationManager,
                           JwtTokenService jwtTokenService,
                           UsuarioDetailsService usuarioDetailsService,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder,
+                          UsuarioService usuarioService) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenService = jwtTokenService;
         this.userDetailsService = usuarioDetailsService;
         this.passwordEncoder = passwordEncoder;
+        this.usuarioService = usuarioService;
+    }
+
+    @PostMapping(value = "/pre-cadastro", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            summary = "Pré-cadastro de usuário",
+            description = "Realiza o pré-cadastro de um novo usuário no sistema. Este endpoint é público.")
+    @ApiResponse(responseCode = "201", description = "Usuário pré-cadastrado com sucesso")
+    @ApiResponse(responseCode = "400", description = "Dados inválidos ou senhas não coincidem")
+    public ResponseEntity<UsuarioDTO> preCadastro(
+            @Parameter(description = "Dados do pré-cadastro") @RequestPart("dados") @Valid PreCadastroDTO preCadastroDTO,
+            @Parameter(description = "Foto de perfil (opcional)") @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+        log.info("Recebendo pré-cadastro para o email: {}", preCadastroDTO.getEmail());
+        UsuarioDTO saved = usuarioService.preCadastro(preCadastroDTO, imagem);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     /**

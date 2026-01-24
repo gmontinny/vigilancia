@@ -1,5 +1,6 @@
 package br.gov.mt.vigilancia.saude.service;
 
+import br.gov.mt.vigilancia.saude.dto.PreCadastroDTO;
 import br.gov.mt.vigilancia.saude.dto.UsuarioDTO;
 import br.gov.mt.vigilancia.saude.mapper.UsuarioMapper;
 import br.gov.mt.vigilancia.saude.repository.UsuarioRepository;
@@ -20,6 +21,37 @@ public class UsuarioService {
     private final UsuarioMapper usuarioMapper;
     private final PasswordEncoder passwordEncoder;
     private final MinioStorageService minioStorageService;
+
+    @Transactional(rollbackFor = Exception.class)
+    public UsuarioDTO preCadastro(PreCadastroDTO preCadastroDTO, MultipartFile imagem) {
+        if (!preCadastroDTO.getSenha().equals(preCadastroDTO.getConfirmarSenha())) {
+            throw new RuntimeException("As senhas não coincidem!");
+        }
+
+        UsuarioDTO usuarioDTO = UsuarioDTO.builder()
+                .nome(preCadastroDTO.getNome())
+                .cpf(preCadastroDTO.getCpf())
+                .celular(preCadastroDTO.getCelular())
+                .email(preCadastroDTO.getEmail())
+                .sexo(preCadastroDTO.getSexo())
+                .senha(preCadastroDTO.getSenha())
+                .status(0) // 0 = Inativo/Pendente
+                .tipo(2)   // 2 = Usuário Externo (ajustar conforme enum/regra do sistema)
+                .advogado(0)
+                .auditor(0)
+                .administrativo(0)
+                .coordenador(0)
+                .recursoHumano(0)
+                .statusEnvio(0)
+                .build();
+
+        if (imagem != null && !imagem.isEmpty()) {
+            String objectKey = minioStorageService.upload(imagem, "usuarios");
+            usuarioDTO.setImagem(objectKey);
+        }
+
+        return save(usuarioDTO);
+    }
 
     @Transactional(readOnly = true)
     public List<UsuarioDTO> findAll() {
