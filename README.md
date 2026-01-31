@@ -23,9 +23,9 @@ Principais grupos:
 
 O projeto utiliza MinIO (compatível com S3) para armazenar arquivos, como a imagem do usuário no `POST /usuarios`. O bucket padrão é `vigilancia`.
 
-- Subir apenas o MinIO (modo dev):
+- Subir todos os serviços (Postgres, PgAdmin, Mailhog, MinIO):
   ```bash
-  docker compose -f docker-compose-minio.yml up -d
+  docker compose up -d
   ```
 - Console Web: http://localhost:9001 (user/pass padrão: `minioadmin`/`minioadmin`).
 - A aplicação garante a criação do bucket configurado ao iniciar (`vigilancia` por padrão).

@@ -87,5 +87,6 @@ public class Usuario {
     private String totpSecret;
 
     // Indica se o TOTP está habilitado para o usuário
-    private Boolean totpEnabled;
+    @Builder.Default
+    private Boolean totpEnabled = false;
 }

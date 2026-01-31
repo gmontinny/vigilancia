@@ -43,6 +43,7 @@ public class UsuarioService {
                 .coordenador(0)
                 .recursoHumano(0)
                 .statusEnvio(0)
+                .totpEnabled(false)
                 .build();
 
         if (imagem != null && !imagem.isEmpty()) {
@@ -70,6 +71,10 @@ public class UsuarioService {
     @Transactional(rollbackFor = Exception.class)
     public UsuarioDTO save(UsuarioDTO usuarioDTO) {
         var entity = usuarioMapper.toEntity(usuarioDTO);
+        
+        if (entity.getTotpEnabled() == null) {
+            entity.setTotpEnabled(false);
+        }
 
         // Regras para senha: codificar quando informada; manter atual quando não informada em updates
         boolean hasNewPassword = usuarioDTO.getSenha() != null && !usuarioDTO.getSenha().isBlank();

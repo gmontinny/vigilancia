@@ -22,7 +22,7 @@ docker compose up -d mailhog
 
 Subir apenas o MinIO:
 ```bash
-docker compose -f docker-compose-minio.yml up -d
+docker compose up -d minio
 ```
 
 ## Variáveis de ambiente (.env)

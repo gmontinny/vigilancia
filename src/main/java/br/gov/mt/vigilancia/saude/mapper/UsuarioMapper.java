@@ -22,6 +22,5 @@ public interface UsuarioMapper {
     @Mapping(target = "permissoes", ignore = true)
     @Mapping(target = "estabelecimentos", ignore = true)
     @Mapping(target = "totpSecret", ignore = true)
-    @Mapping(target = "totpEnabled", ignore = true)
     Usuario toEntity(UsuarioDTO usuarioDTO);
 }
